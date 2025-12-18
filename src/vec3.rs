@@ -18,6 +18,18 @@ pub fn unit_vector(v: Vec3) -> Vec3 {
     v / v.length()
 }
 
+pub fn dot(v: Vec3, rhs: Vec3) -> f64 {
+    v.e[0] * rhs.e[0] + v.e[1] * rhs.e[1] + v.e[2] * rhs.e[2]
+}
+
+pub fn cross(v: Vec3, rhs: Vec3) -> Vec3 {
+    Vec3::new(
+        v.e[1] * rhs.e[2] - v.e[2] * rhs.e[1],
+        v.e[2] * rhs.e[0] - v.e[0] * rhs.e[2],
+        v.e[0] * rhs.e[1] - v.e[1] * rhs.e[0],
+    )
+}
+
 impl Vec3 {
     pub fn new(e0: f64, e1: f64, e2: f64) -> Self {
         let e = [e0, e1, e2];
@@ -42,18 +54,6 @@ impl Vec3 {
 
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
-    }
-
-    pub fn dot(&self, rhs: Self) -> f64 {
-        self.e[0] * rhs.e[0] + self.e[1] * rhs.e[1] + self.e[2] * rhs.e[2]
-    }
-
-    pub fn cross(&self, rhs: Vec3) -> Vec3 {
-        Vec3::new(
-            self.e[1] * rhs.e[2] - self.e[2] * rhs.e[1],
-            self.e[2] * rhs.e[0] - self.e[0] * rhs.e[2],
-            self.e[0] * rhs.e[1] - self.e[1] * rhs.e[0],
-        )
     }
 }
 
