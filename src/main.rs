@@ -1,3 +1,4 @@
+// #![feature(stdarch_x86_avx512)]
 use crate::camera::Camera;
 use core::f64;
 use hittable_list::HittableList;
@@ -25,7 +26,7 @@ fn main() {
 
     let aspect_ratio: f64 = 16.0 / 9.0;
     let image_width: f64 = 400.0;
-    let cam = Camera::new(aspect_ratio, image_width);
+    let cam = Camera::new(aspect_ratio, image_width, 10);
 
     // Render
 
