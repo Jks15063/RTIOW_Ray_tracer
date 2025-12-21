@@ -1,4 +1,10 @@
+use core::f64;
+
+use hittable_list::HittableList;
+use sphere::Sphere;
+
 use crate::color::Color;
+use crate::hittable::Hittable;
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 
@@ -8,6 +14,10 @@ mod hittable_list;
 mod ray;
 mod sphere;
 mod vec3;
+
+pub fn degrees_to_radians(degrees: f64) -> f64 {
+    degrees * f64::consts::PI / 180.0
+}
 
 pub fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
     let oc = center - r.origin();
@@ -23,11 +33,9 @@ pub fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
     }
 }
 
-pub fn ray_color(r: Ray) -> Color {
-    let t = hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, r);
-    if t > 0.0 {
-        let N = vec3::unit_vector(r.at(t) - Vec3::new(0.0, 0.0, -1.0));
-        return 0.5 * Color::new(N.x() + 1.0, N.y() + 1.0, N.z() + 1.0);
+pub fn ray_color(r: Ray, world: Box<&dyn Hittable>) -> Color {
+    if let Some(rec) = world.hit(&r, 0.0, f64::INFINITY) {
+        return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
     }
 
     let unit_direction = vec3::unit_vector(r.direction());
@@ -41,8 +49,16 @@ fn main() {
     let aspect_ratio: f64 = 16.0 / 9.0;
     let image_width: f64 = 400.0;
 
+    // Calculate the image height, ensure at least 1
     let image_height = (image_width / aspect_ratio) as i32;
     let image_height = if image_height < 1 { 1 } else { image_height };
+
+    // World
+
+    let mut world = HittableList::new();
+
+    world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
     // Camera
 
@@ -75,7 +91,7 @@ fn main() {
             let ray_direction = pixel_center - camera_center;
             let r = Ray::new(camera_center, ray_direction);
 
-            let pixel_color = ray_color(r);
+            let pixel_color = ray_color(r, Box::new(&world));
             println!("{}", color::write_color(pixel_color));
         }
     }
