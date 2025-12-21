@@ -1,24 +1,25 @@
-use vec3::dot;
-
 use crate::color::Color;
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 
 mod color;
+mod hittable;
+mod hittable_list;
 mod ray;
+mod sphere;
 mod vec3;
 
 pub fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
     let oc = center - r.origin();
-    let a = vec3::dot(r.direction(), r.direction());
-    let b = -2.0 * vec3::dot(r.direction(), oc);
-    let c = vec3::dot(oc, oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
+    let a = r.direction().length_squared();
+    let h = vec3::dot(r.direction(), oc);
+    let c = oc.length_squared() - radius * radius;
+    let discriminant = h * h - a * c;
 
     if discriminant < 0.0 {
         return -1.0;
     } else {
-        return (-b - discriminant.sqrt()) / (2.0 * a);
+        return (h - discriminant.sqrt()) / a;
     }
 }
 
