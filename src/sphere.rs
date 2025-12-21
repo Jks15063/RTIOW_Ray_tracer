@@ -1,10 +1,7 @@
+use crate::hittable::{HitRecord, Hittable};
 use crate::interval::Interval;
 use crate::ray::Ray;
-use crate::vec3;
-use crate::{
-    hittable::{HitRecord, Hittable},
-    vec3::Point3,
-};
+use crate::vec3::{self, Point3};
 
 pub struct Sphere {
     pub center: Point3,

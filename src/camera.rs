@@ -3,8 +3,7 @@ use crate::color::Color;
 use crate::hittable::Hittable;
 use crate::interval::Interval;
 use crate::ray::Ray;
-use crate::vec3;
-use crate::vec3::{Point3, Vec3};
+use crate::vec3::{self, Point3, Vec3};
 
 pub struct Camera {
     image_height: i32,
