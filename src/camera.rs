@@ -1,5 +1,4 @@
-use crate::color;
-use crate::color::Color;
+use crate::color::{self, Color};
 use crate::hittable::Hittable;
 use crate::interval::Interval;
 use crate::ray::Ray;
