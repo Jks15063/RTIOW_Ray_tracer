@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::fmt;
 use std::ops::Add;
 use std::ops::AddAssign;
@@ -27,6 +28,41 @@ pub fn cross(v: Vec3, rhs: Vec3) -> Vec3 {
         v.e[1] * rhs.e[2] - v.e[2] * rhs.e[1],
         v.e[2] * rhs.e[0] - v.e[0] * rhs.e[2],
         v.e[0] * rhs.e[1] - v.e[1] * rhs.e[0],
+    )
+}
+
+pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
+    let on_unit_sphere = random_unit_vector();
+    if dot(on_unit_sphere, normal) > 0.0 {
+        return on_unit_sphere;
+    } else {
+        return -on_unit_sphere;
+    }
+}
+
+fn random_unit_vector() -> Vec3 {
+    loop {
+        let p = random_range(-1.0, 1.0);
+        let lensq = p.length_squared();
+        if 1e-160 < lensq && lensq <= 1.0 {
+            return p / lensq.sqrt();
+        }
+    }
+}
+
+fn random() -> Vec3 {
+    Vec3::new(
+        rand::rng().random(),
+        rand::rng().random(),
+        rand::rng().random(),
+    )
+}
+
+fn random_range(min: f64, max: f64) -> Vec3 {
+    Vec3::new(
+        rand::rng().random_range(min..max),
+        rand::rng().random_range(min..max),
+        rand::rng().random_range(min..max),
     )
 }
 
