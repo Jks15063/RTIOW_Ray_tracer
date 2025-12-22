@@ -1,19 +1,22 @@
 use crate::interval::Interval;
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 
-pub struct HitRecord {
+pub struct HitRecord<'a> {
     pub p: Point3,
     pub normal: Vec3,
+    pub mat: &'a dyn Material,
     pub t: f64, //distance along the ray the hit occurs
     pub front_face: bool,
 }
 
-impl HitRecord {
-    pub fn new(p: Point3, normal: Vec3, t: f64, front_face: bool) -> Self {
+impl<'a> HitRecord<'a> {
+    pub fn new(p: Point3, normal: Vec3, mat: &'a dyn Material, t: f64, front_face: bool) -> Self {
         Self {
             p,
             normal,
+            mat,
             t,
             front_face,
         }
