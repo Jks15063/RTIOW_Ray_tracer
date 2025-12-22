@@ -25,7 +25,7 @@ fn main() {
 
     let aspect_ratio: f64 = 16.0 / 9.0;
     let image_width: f64 = 400.0;
-    let cam = Camera::new(aspect_ratio, image_width, 10);
+    let cam = Camera::new(aspect_ratio, image_width, 10, 50);
 
     // Render
 

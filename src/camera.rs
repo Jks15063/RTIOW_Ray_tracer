@@ -14,10 +14,16 @@ pub struct Camera {
     pixel_delta_v: Vec3,
     samples_per_pixel: i32,
     pixel_samples_scale: f64,
+    max_depth: i32,
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: f64, samples_per_pixel: i32) -> Self {
+    pub fn new(
+        aspect_ratio: f64,
+        image_width: f64,
+        samples_per_pixel: i32,
+        max_depth: i32,
+    ) -> Self {
         let image_height = (image_width / aspect_ratio) as i32;
         let image_height = if image_height < 1 { 1 } else { image_height };
 
@@ -46,6 +52,7 @@ impl Camera {
             pixel_delta_v,
             samples_per_pixel,
             pixel_samples_scale,
+            max_depth,
         }
     }
 
@@ -61,7 +68,7 @@ impl Camera {
 
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
-                    pixel_color += ray_color(r, world);
+                    pixel_color += ray_color(r, self.max_depth, world);
                 }
 
                 println!(
@@ -94,10 +101,14 @@ fn sample_square() -> Vec3 {
     Vec3::new(x - 0.5, y - 0.5, 0.0)
 }
 
-fn ray_color(r: Ray, world: &dyn Hittable) -> Color {
+fn ray_color(r: Ray, depth: i32, world: &dyn Hittable) -> Color {
+    if depth <= 0 {
+        return Color::new(0.0, 0.0, 0.0);
+    }
+
     if let Some(rec) = world.hit(&r, Interval::new(0.0, f64::INFINITY)) {
         let direction = vec3::random_on_hemisphere(rec.normal);
-        return 0.5 * ray_color(Ray::new(rec.p, direction), world);
+        return 0.5 * ray_color(Ray::new(rec.p, direction), depth - 1, world);
     }
 
     let unit_direction = vec3::unit_vector(r.direction());
