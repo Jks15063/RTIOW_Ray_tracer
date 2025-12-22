@@ -31,22 +31,22 @@ pub fn cross(v: Vec3, rhs: Vec3) -> Vec3 {
     )
 }
 
-pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
-    let on_unit_sphere = random_unit_vector();
-    if dot(on_unit_sphere, normal) > 0.0 {
-        return on_unit_sphere;
-    } else {
-        return -on_unit_sphere;
-    }
-}
-
-fn random_unit_vector() -> Vec3 {
+pub fn random_unit_vector() -> Vec3 {
     loop {
         let p = random_range(-1.0, 1.0);
         let lensq = p.length_squared();
         if 1e-160 < lensq && lensq <= 1.0 {
             return p / lensq.sqrt();
         }
+    }
+}
+
+pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
+    let on_unit_sphere = random_unit_vector();
+    if dot(on_unit_sphere, normal) > 0.0 {
+        return on_unit_sphere;
+    } else {
+        return -on_unit_sphere;
     }
 }
 
