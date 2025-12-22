@@ -88,8 +88,8 @@ impl Camera {
 }
 
 fn sample_square() -> Vec3 {
-    let x: f64 = rand::rng().random_range(0.0..1.0);
-    let y: f64 = rand::rng().random_range(0.0..1.0);
+    let x: f64 = rand::rng().random();
+    let y: f64 = rand::rng().random();
 
     Vec3::new(x - 0.5, y - 0.5, 0.0)
 }

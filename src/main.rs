@@ -1,4 +1,3 @@
-// #![feature(stdarch_x86_avx512)]
 use crate::camera::Camera;
 use core::f64;
 use hittable_list::HittableList;
