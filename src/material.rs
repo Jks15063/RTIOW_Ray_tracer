@@ -1,7 +1,7 @@
 use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
-use crate::vec3;
+use crate::vec3::{self, refract};
 
 pub trait Material {
     fn scatter(&self, r_in: Ray, rec: HitRecord) -> Option<(Color, Ray)>;
@@ -53,4 +53,47 @@ impl Material for Metal {
             None
         }
     }
+}
+
+pub struct Dielectric {
+    refraction_index: f64,
+}
+
+impl Dielectric {
+    pub fn new(refraction_index: f64) -> Self {
+        Self { refraction_index }
+    }
+}
+
+impl Material for Dielectric {
+    fn scatter(&self, r_in: Ray, rec: HitRecord) -> Option<(Color, Ray)> {
+        let attenuation = Color::new(1.0, 1.0, 1.0);
+        let ri = if rec.front_face {
+            1.0 / self.refraction_index
+        } else {
+            self.refraction_index
+        };
+
+        let unit_direction = vec3::unit_vector(r_in.direction());
+        let cos_theta = vec3::dot(-unit_direction, rec.normal).min(1.0);
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+        let cannot_refract = ri * sin_theta > 1.0;
+
+        let direction = if cannot_refract {
+            vec3::reflect(unit_direction, rec.normal)
+        } else {
+            vec3::refract(unit_direction, rec.normal, ri)
+        };
+
+        let scattered = Ray::new(rec.p, direction);
+
+        Some((attenuation, scattered))
+    }
+}
+
+fn reflectance(cosine: f64, refraction_index: f64) -> f64 {
+    let r0 = (1.0 - refraction_index) / (1.0 + refraction_index).powi(2);
+    // let r0 = r0 * r0;
+
+    r0 + (1.0 - r0) * (1.0 - cosine).powi(5)
 }
