@@ -23,39 +23,20 @@ fn main() {
 
     let mut world = HittableList::new();
 
-    let material_ground = Box::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
-    let material_center = Box::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
-    let material_left = Box::new(Dielectric::new(1.50));
-    let material_bubble = Box::new(Dielectric::new(1.00 / 1.50));
-    let material_right = Box::new(Metal::new(Color::new(0.8, 0.6, 0.2), 1.0));
+    let R = (f64::consts::PI / 4.0).cos();
+
+    let material_left = Box::new(Lambertian::new(Color::new(0.0, 0.0, 1.0)));
+    let material_right = Box::new(Lambertian::new(Color::new(1.0, 0.0, 0.0)));
 
     world.add(Box::new(Sphere::new(
-        Point3::new(0.0, -100.5, -1.0),
-        100.0,
-        material_ground,
-    )));
-
-    world.add(Box::new(Sphere::new(
-        Point3::new(0.0, 0.0, -1.2),
-        0.5,
-        material_center,
-    )));
-
-    world.add(Box::new(Sphere::new(
-        Point3::new(-1.0, 0.0, -1.0),
-        0.5,
+        Point3::new(-R, 0.0, -1.0),
+        R,
         material_left,
     )));
 
     world.add(Box::new(Sphere::new(
-        Point3::new(-1.0, 0.0, -1.0),
-        0.4,
-        material_bubble,
-    )));
-
-    world.add(Box::new(Sphere::new(
-        Point3::new(1.0, 0.0, -1.0),
-        0.5,
+        Point3::new(R, 0.0, -1.0),
+        R,
         material_right,
     )));
 
