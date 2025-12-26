@@ -1,3 +1,5 @@
+use core::f64;
+
 use crate::color::{self, Color};
 use crate::hittable::Hittable;
 use crate::interval::Interval;
@@ -23,13 +25,17 @@ impl Camera {
         image_width: f64,
         samples_per_pixel: i32,
         max_depth: i32,
+        vfov: i32,
     ) -> Self {
         let image_height = (image_width / aspect_ratio) as i32;
         let image_height = if image_height < 1 { 1 } else { image_height };
 
         let center = Point3::new(0.0, 0.0, 0.0);
         let focal_length = 1.0;
-        let viewport_height = 2.0;
+        let theta = vfov as f64 * f64::consts::PI / 180.0;
+        let h = (theta / 2.0).tan();
+
+        let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * (image_width / image_height as f64);
 
         let viewport_u = Vec3::new(viewport_width, 0.0, 0.0);
