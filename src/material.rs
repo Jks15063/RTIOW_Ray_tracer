@@ -1,7 +1,7 @@
 use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
-use crate::vec3::{self, refract};
+use crate::vec3;
 
 pub trait Material {
     fn scatter(&self, r_in: Ray, rec: HitRecord) -> Option<(Color, Ray)>;

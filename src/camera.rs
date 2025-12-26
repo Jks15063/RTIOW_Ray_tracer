@@ -17,6 +17,9 @@ pub struct Camera {
     samples_per_pixel: i32,
     pixel_samples_scale: f64,
     max_depth: i32,
+    u: Vec3,
+    v: Vec3,
+    w: Vec3,
 }
 
 impl Camera {
@@ -26,26 +29,34 @@ impl Camera {
         samples_per_pixel: i32,
         max_depth: i32,
         vfov: i32,
+        lookfrom: Point3,
+        lookat: Point3,
+        vup: Vec3,
     ) -> Self {
         let image_height = (image_width / aspect_ratio) as i32;
         let image_height = if image_height < 1 { 1 } else { image_height };
 
-        let center = Point3::new(0.0, 0.0, 0.0);
-        let focal_length = 1.0;
+        let center = lookfrom;
+
+        // Determin viewport dimensions
+
+        let focal_length = (lookfrom - lookat).length();
         let theta = vfov as f64 * f64::consts::PI / 180.0;
         let h = (theta / 2.0).tan();
-
         let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * (image_width / image_height as f64);
 
-        let viewport_u = Vec3::new(viewport_width, 0.0, 0.0);
-        let viewport_v = Vec3::new(0.0, -viewport_height, 0.0);
+        let w = vec3::unit_vector(lookfrom - lookat);
+        let u = vec3::unit_vector(vec3::cross(vup, w));
+        let v = vec3::cross(w, u);
+
+        let viewport_u = viewport_width * u;
+        let viewport_v = viewport_height * -v;
 
         let pixel_delta_u = viewport_u / image_width;
         let pixel_delta_v = viewport_v / image_height as f64;
 
-        let viewport_upper_left =
-            center - Vec3::new(0.0, 0.0, focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
+        let viewport_upper_left = center - (focal_length * w) - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
         let pixel_samples_scale = 1.0 / samples_per_pixel as f64;
 
@@ -59,6 +70,9 @@ impl Camera {
             samples_per_pixel,
             pixel_samples_scale,
             max_depth,
+            u,
+            v,
+            w,
         }
     }
 
