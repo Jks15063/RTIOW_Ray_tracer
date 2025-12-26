@@ -63,10 +63,22 @@ fn main() {
 
     let aspect_ratio: f64 = 16.0 / 9.0;
     let image_width: f64 = 800.0;
+    let samples_per_pixel = 50;
+    let max_depth = 50;
+    let vfov = 20;
     let lookfrom = Point3::new(-2.0, 2.0, 1.0);
     let lookat = Point3::new(0.0, 0.0, -1.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
-    let cam = Camera::new(aspect_ratio, image_width, 50, 50, 90, lookfrom, lookat, vup);
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+    );
 
     // Render
 
