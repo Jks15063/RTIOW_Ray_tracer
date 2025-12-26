@@ -20,6 +20,9 @@ pub struct Camera {
     u: Vec3,
     v: Vec3,
     w: Vec3,
+    defocus_angle: f64,
+    defocus_disk_u: Vec3,
+    defocus_disk_v: Vec3,
 }
 
 impl Camera {
@@ -32,6 +35,8 @@ impl Camera {
         lookfrom: Point3,
         lookat: Point3,
         vup: Vec3,
+        defocus_angle: f64,
+        focus_dist: f64,
     ) -> Self {
         let image_height = (image_width / aspect_ratio) as i32;
         let image_height = if image_height < 1 { 1 } else { image_height };
@@ -40,10 +45,9 @@ impl Camera {
 
         // Determin viewport dimensions
 
-        let focal_length = (lookfrom - lookat).length();
-        let theta = vfov as f64 * f64::consts::PI / 180.0;
+        let theta = degrees_to_radians(vfov as f64);
         let h = (theta / 2.0).tan();
-        let viewport_height = 2.0 * h * focal_length;
+        let viewport_height = 2.0 * h * focus_dist;
         let viewport_width = viewport_height * (image_width / image_height as f64);
 
         let w = vec3::unit_vector(lookfrom - lookat);
@@ -56,9 +60,13 @@ impl Camera {
         let pixel_delta_u = viewport_u / image_width;
         let pixel_delta_v = viewport_v / image_height as f64;
 
-        let viewport_upper_left = center - (focal_length * w) - viewport_u / 2.0 - viewport_v / 2.0;
+        let viewport_upper_left = center - (focus_dist * w) - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
         let pixel_samples_scale = 1.0 / samples_per_pixel as f64;
+
+        let defocus_radius = focus_dist * degrees_to_radians(defocus_angle / 2.0).tan();
+        let defocus_disk_u = u * defocus_radius;
+        let defocus_disk_v = v * defocus_radius;
 
         Camera {
             image_height,
@@ -73,6 +81,9 @@ impl Camera {
             u,
             v,
             w,
+            defocus_angle,
+            defocus_disk_u,
+            defocus_disk_v,
         }
     }
 
@@ -107,11 +118,26 @@ impl Camera {
             + ((i as f64 + offset.x()) * self.pixel_delta_u)
             + ((j as f64 + offset.y()) * self.pixel_delta_v);
 
-        let ray_origin = self.center;
+        let ray_origin = if self.defocus_angle <= 0.0 {
+            self.center
+        } else {
+            self.defocus_disk_sample()
+        };
+
         let ray_direction = pixel_sample - ray_origin;
 
         Ray::new(ray_origin, ray_direction)
     }
+
+    fn defocus_disk_sample(&self) -> Point3 {
+        let p = vec3::random_in_unit_disk();
+
+        self.center + (p[0] * self.defocus_disk_u) + (p[1] * self.defocus_disk_v)
+    }
+}
+
+fn degrees_to_radians(degrees: f64) -> f64 {
+    degrees * f64::consts::PI / 180.0
 }
 
 fn sample_square() -> Vec3 {
