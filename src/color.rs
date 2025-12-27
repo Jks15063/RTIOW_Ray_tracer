@@ -1,3 +1,4 @@
+pub use crate::vec3::{random, random_range};
 use crate::{interval::Interval, vec3::Vec3};
 
 pub type Color = Vec3;

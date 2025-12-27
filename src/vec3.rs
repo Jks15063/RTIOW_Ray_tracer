@@ -76,7 +76,7 @@ pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f64) -> Vec3 {
     r_out_perp + r_out_parallel
 }
 
-fn random() -> Vec3 {
+pub fn random() -> Vec3 {
     Vec3::new(
         rand::rng().random(),
         rand::rng().random(),
@@ -84,7 +84,7 @@ fn random() -> Vec3 {
     )
 }
 
-fn random_range(min: f64, max: f64) -> Vec3 {
+pub fn random_range(min: f64, max: f64) -> Vec3 {
     Vec3::new(
         rand::rng().random_range(min..max),
         rand::rng().random_range(min..max),
