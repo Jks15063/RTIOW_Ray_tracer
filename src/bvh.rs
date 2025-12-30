@@ -23,7 +23,12 @@ impl BVHNode {
     }
 
     pub fn node(mut objects: Vec<Box<dyn Hittable>>) -> Self {
-        let axis: i32 = rand::rng().random_range(0..3);
+        let mut bbox = AABB::empty();
+        for object in objects.iter() {
+            bbox = AABB::from_aabb(bbox, object.bounding_box());
+        }
+
+        let axis = bbox.longest_axis();
 
         match objects.len() {
             1 => {

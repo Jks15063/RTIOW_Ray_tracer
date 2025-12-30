@@ -10,7 +10,7 @@ pub struct AABB {
 }
 
 impl AABB {
-    pub fn new() -> Self {
+    pub fn empty() -> Self {
         Self {
             x: Interval::EMPTY,
             y: Interval::EMPTY,
@@ -96,5 +96,19 @@ impl AABB {
             }
         }
         true
+    }
+
+    pub fn longest_axis(&self) -> i32 {
+        let x_size = self.x.size();
+        let y_size = self.y.size();
+        let z_size = self.z.size();
+
+        if x_size > y_size && x_size > z_size {
+            0
+        } else if y_size > z_size {
+            1
+        } else {
+            2
+        }
     }
 }

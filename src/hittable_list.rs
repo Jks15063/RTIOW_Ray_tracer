@@ -12,7 +12,7 @@ impl HittableList {
     pub fn new() -> Self {
         HittableList {
             objects: vec![],
-            bbox: AABB::new(),
+            bbox: AABB::empty(),
         }
     }
 
