@@ -1,28 +1,55 @@
+use crate::aabb::AABB;
 use crate::hittable::{HitRecord, Hittable};
 use crate::interval::Interval;
 use crate::material::Material;
 use crate::ray::Ray;
-use crate::vec3::{self, Point3};
+use crate::vec3::{self, Point3, Vec3};
 
 pub struct Sphere {
-    pub center: Point3,
+    pub center: Ray,
     pub radius: f64,
     pub mat: Box<dyn Material>,
+    pub bbox: AABB,
 }
 
 impl Sphere {
-    pub fn new(center: Point3, radius: f64, mat: Box<dyn Material>) -> Self {
+    pub fn new_static(center: Point3, radius: f64, mat: Box<dyn Material>) -> Self {
+        let rvec = Vec3::new(radius, radius, radius);
+        let bbox = AABB::from_points(center - rvec, center + rvec);
+
+        Sphere {
+            center: Ray::new(center, Vec3::new(0.0, 0.0, 0.0), 0.0),
+            radius: radius.max(0.0),
+            mat,
+            bbox,
+        }
+    }
+
+    pub fn new_moving(
+        center1: Point3,
+        center2: Point3,
+        radius: f64,
+        mat: Box<dyn Material>,
+    ) -> Self {
+        let rvec = Vec3::new(radius, radius, radius);
+        let center = Ray::new(center1, center2 - center1, 0.0);
+        let box1 = AABB::from_points(center.at(0.0) - rvec, center.at(0.0) + rvec);
+        let box2 = AABB::from_points(center.at(1.0) - rvec, center.at(1.0) + rvec);
+        let bbox = AABB::from_aabb(box1, box2);
+
         Sphere {
             center,
             radius: radius.max(0.0),
             mat,
+            bbox,
         }
     }
 }
 
 impl Hittable for Sphere {
     fn hit(&self, r: &Ray, ray_t: Interval) -> Option<HitRecord> {
-        let oc = self.center - r.origin();
+        let current_center = self.center.at(r.time());
+        let oc = current_center - r.origin();
         let a = r.direction().length_squared();
         let h = vec3::dot(r.direction(), oc);
         let c = oc.length_squared() - self.radius * self.radius;
@@ -43,7 +70,7 @@ impl Hittable for Sphere {
         }
 
         let p = r.at(root);
-        let outward_normal = (p - self.center) / self.radius;
+        let outward_normal = (p - current_center) / self.radius;
         let front_face = vec3::dot(r.direction(), outward_normal) < 0.0;
         let normal = if front_face {
             outward_normal
@@ -58,5 +85,9 @@ impl Hittable for Sphere {
             root,
             front_face,
         ))
+    }
+
+    fn bounding_box(&self) -> AABB {
+        self.bbox
     }
 }

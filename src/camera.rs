@@ -125,8 +125,9 @@ impl Camera {
         };
 
         let ray_direction = pixel_sample - ray_origin;
+        let ray_time = rand::rng().random();
 
-        Ray::new(ray_origin, ray_direction)
+        Ray::new(ray_origin, ray_direction, ray_time)
     }
 
     fn defocus_disk_sample(&self) -> Point3 {
