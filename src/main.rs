@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use bvh::BVHNode;
 use material::Dielectric;
 use rand::Rng;
@@ -124,5 +126,8 @@ fn main() {
 
     // Render
 
+    let start = Instant::now();
     cam.render(&bvh);
+    let duration = start.elapsed();
+    eprintln!("Render time: {:?}", duration);
 }
