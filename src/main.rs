@@ -1,3 +1,4 @@
+use bvh::BVHNode;
 use material::Dielectric;
 use rand::Rng;
 
@@ -10,6 +11,7 @@ use crate::vec3::{Point3, Vec3};
 use core::f64;
 
 mod aabb;
+mod bvh;
 mod camera;
 mod color;
 mod hittable;
@@ -90,6 +92,8 @@ fn main() {
         material3,
     )));
 
+    let bvh = BVHNode::node_from_list(world);
+
     // Camera
 
     let aspect_ratio: f64 = 16.0 / 9.0;
@@ -120,5 +124,5 @@ fn main() {
 
     // Render
 
-    cam.render(&world);
+    cam.render(&bvh);
 }
