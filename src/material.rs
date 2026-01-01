@@ -3,6 +3,7 @@ use rand::Rng;
 use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
+use crate::texture::{SolidColor, Texture};
 use crate::vec3;
 
 pub trait Material {
@@ -10,12 +11,18 @@ pub trait Material {
 }
 
 pub struct Lambertian {
-    albedo: Color,
+    tex: Box<dyn Texture>,
 }
 
 impl Lambertian {
-    pub fn new(albedo: Color) -> Self {
-        Self { albedo }
+    pub fn new(tex: Box<dyn Texture>) -> Self {
+        Self { tex }
+    }
+
+    pub fn from_color(albedo: Color) -> Self {
+        Self {
+            tex: Box::new(SolidColor::new(albedo)),
+        }
     }
 }
 
@@ -28,7 +35,8 @@ impl Material for Lambertian {
         }
 
         let scattered = Ray::new(rec.p, scatter_direction, r_in.time());
-        Some((self.albedo, scattered))
+        let attenuation = self.tex.value(rec.u, rec.v, rec.p);
+        Some((attenuation, scattered))
     }
 }
 

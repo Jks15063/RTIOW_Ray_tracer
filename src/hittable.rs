@@ -9,16 +9,28 @@ pub struct HitRecord<'a> {
     pub normal: Vec3,
     pub mat: &'a dyn Material,
     pub t: f64, //distance along the ray the hit occurs
+    pub u: f64,
+    pub v: f64,
     pub front_face: bool,
 }
 
 impl<'a> HitRecord<'a> {
-    pub fn new(p: Point3, normal: Vec3, mat: &'a dyn Material, t: f64, front_face: bool) -> Self {
+    pub fn new(
+        p: Point3,
+        normal: Vec3,
+        mat: &'a dyn Material,
+        t: f64,
+        u: f64,
+        v: f64,
+        front_face: bool,
+    ) -> Self {
         Self {
             p,
             normal,
             mat,
             t,
+            u,
+            v,
             front_face,
         }
     }

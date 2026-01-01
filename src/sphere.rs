@@ -83,6 +83,8 @@ impl Hittable for Sphere {
             normal,
             self.mat.as_ref(),
             root,
+            0.0,
+            0.0,
             front_face,
         ))
     }

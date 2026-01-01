@@ -3,6 +3,7 @@ use std::time::Instant;
 use bvh::BVHNode;
 use material::Dielectric;
 use rand::Rng;
+use texture::CheckerTexture;
 
 use crate::camera::Camera;
 use crate::color::Color;
@@ -22,6 +23,7 @@ mod interval;
 mod material;
 mod ray;
 mod sphere;
+mod texture;
 mod vec3;
 
 fn main() {
@@ -29,11 +31,15 @@ fn main() {
 
     let mut world = HittableList::new();
 
-    let ground_material = Box::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    let ground_material = Box::new(Lambertian::new(Box::new(CheckerTexture::from_colors(
+        0.32,
+        Color::new(0.2, 0.3, 0.1),
+        Color::new(0.9, 0.9, 0.9),
+    ))));
 
     world.add(Box::new(Sphere::new_static(
-        Point3::new(0.0, -100.5, -1.0),
-        100.0,
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
         ground_material,
     )));
 
@@ -50,7 +56,7 @@ fn main() {
                 if choose_mat < 0.8 {
                     //diffuse
                     let albedo = color::random() * color::random();
-                    let sphere_material = Box::new(Lambertian::new(albedo));
+                    let sphere_material = Box::new(Lambertian::from_color(albedo));
                     let center2 = center + Vec3::new(0.0, rand::rng().random_range(0.0..0.5), 0.0);
                     world.add(Box::new(Sphere::new_moving(
                         center,
@@ -80,7 +86,7 @@ fn main() {
         material1,
     )));
 
-    let material2 = Box::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
+    let material2 = Box::new(Lambertian::from_color(Color::new(0.4, 0.2, 0.1)));
     world.add(Box::new(Sphere::new_static(
         Point3::new(-4.0, 1.0, 0.0),
         1.0,
@@ -99,7 +105,7 @@ fn main() {
     // Camera
 
     let aspect_ratio: f64 = 16.0 / 9.0;
-    let image_width: f64 = 400.0;
+    let image_width: f64 = 800.0;
     let samples_per_pixel = 100;
     let max_depth = 50;
 
