@@ -27,6 +27,83 @@ mod texture;
 mod vec3;
 
 fn main() {
+    match 2 {
+        1 => {
+            bouncing_spheres();
+        }
+        2 => {
+            checkered_spheres();
+        }
+        _ => {
+            bouncing_spheres();
+        }
+    }
+}
+
+fn checkered_spheres() {
+    let mut world = HittableList::new();
+
+    let checker_material1 = Box::new(Lambertian::new(Box::new(CheckerTexture::from_colors(
+        0.32,
+        Color::new(0.2, 0.3, 0.1),
+        Color::new(0.9, 0.9, 0.9),
+    ))));
+
+    let checker_material2 = Box::new(Lambertian::new(Box::new(CheckerTexture::from_colors(
+        0.32,
+        Color::new(0.2, 0.3, 0.1),
+        Color::new(0.9, 0.9, 0.9),
+    ))));
+
+    world.add(Box::new(Sphere::new_static(
+        Point3::new(0.0, -10.0, 0.0),
+        10.0,
+        checker_material1,
+    )));
+
+    world.add(Box::new(Sphere::new_static(
+        Point3::new(0.0, 10.0, 0.0),
+        10.0,
+        checker_material2,
+    )));
+
+    // Camera
+
+    let aspect_ratio: f64 = 16.0 / 9.0;
+    let image_width: f64 = 800.0;
+    let samples_per_pixel = 100;
+    let max_depth = 50;
+
+    let vfov = 20;
+    let lookfrom = Point3::new(13.0, 2.0, 3.0);
+    let lookat = Point3::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
+
+    // Render
+
+    let start = Instant::now();
+    cam.render(&world);
+    let duration = start.elapsed();
+    eprintln!("Render time: {:?}", duration);
+}
+
+fn bouncing_spheres() {
     // World
 
     let mut world = HittableList::new();
