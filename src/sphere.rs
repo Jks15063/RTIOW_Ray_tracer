@@ -1,3 +1,5 @@
+use core::f64;
+
 use crate::aabb::AABB;
 use crate::hittable::{HitRecord, Hittable};
 use crate::interval::Interval;
@@ -78,13 +80,15 @@ impl Hittable for Sphere {
             -outward_normal
         };
 
+        let (u, v) = get_sphere_uv(outward_normal);
+
         Some(HitRecord::new(
             p,
             normal,
             self.mat.as_ref(),
             root,
-            0.0, //TODO replace later
-            0.0, //TODO replace later
+            u,
+            v,
             front_face,
         ))
     }
@@ -92,4 +96,14 @@ impl Hittable for Sphere {
     fn bounding_box(&self) -> AABB {
         self.bbox
     }
+}
+
+fn get_sphere_uv(p: Point3) -> (f64, f64) {
+    let theta = (-p.y()).acos();
+    let phi = (-p.z().atan2(p.x())) + f64::consts::PI;
+
+    let u = phi / (2.0 * f64::consts::PI);
+    let v = theta / f64::consts::PI;
+
+    (u, v)
 }

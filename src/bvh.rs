@@ -18,7 +18,7 @@ pub enum BVHNode {
 }
 
 impl BVHNode {
-    pub fn node_from_list(list: HittableList) -> Self {
+    pub fn from_list(list: HittableList) -> Self {
         Self::node(list.objects)
     }
 

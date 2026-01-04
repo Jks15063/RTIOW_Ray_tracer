@@ -3,6 +3,7 @@ use std::time::Instant;
 use bvh::BVHNode;
 use material::Dielectric;
 use rand::Rng;
+use rtw_stb_image::ImageTexture;
 use texture::CheckerTexture;
 
 use crate::camera::Camera;
@@ -22,14 +23,15 @@ mod hittable_list;
 mod interval;
 mod material;
 mod ray;
+mod rtw_stb_image;
 mod sphere;
 mod texture;
 mod vec3;
 
 fn main() {
-    match 2 {
+    match 1 {
         1 => {
-            bouncing_spheres();
+            earth();
         }
         2 => {
             checkered_spheres();
@@ -38,6 +40,52 @@ fn main() {
             bouncing_spheres();
         }
     }
+}
+
+fn earth() {
+    let mut world = HittableList::new();
+    let earth_texture = Box::new(ImageTexture::new("earthmap.jpg"));
+    let earth_surface = Box::new(Lambertian::new(earth_texture));
+    let globe = Box::new(Sphere::new_static(
+        Point3::new(0.0, 0.0, 0.0),
+        2.0,
+        earth_surface,
+    ));
+
+    world.add(globe);
+
+    let aspect_ratio: f64 = 16.0 / 9.0;
+    let image_width: f64 = 800.0;
+    let samples_per_pixel = 100;
+    let max_depth = 50;
+
+    let vfov = 20;
+    let lookfrom = Point3::new(0.0, 0.0, 12.0);
+    let lookat = Point3::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
+
+    // Render
+
+    let start = Instant::now();
+    cam.render(&world);
+    let duration = start.elapsed();
+    eprintln!("Render time: {:?}", duration);
 }
 
 fn checkered_spheres() {
@@ -177,7 +225,7 @@ fn bouncing_spheres() {
         material3,
     )));
 
-    let bvh = BVHNode::node_from_list(world);
+    let bvh = BVHNode::from_list(world);
 
     // Camera
 
