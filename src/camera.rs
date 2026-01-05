@@ -1,4 +1,5 @@
 use core::f64;
+use std::time::Instant;
 
 use crate::color::{self, Color};
 use crate::hittable::Hittable;
@@ -88,6 +89,7 @@ impl Camera {
     }
 
     pub fn render(&self, world: &dyn Hittable) {
+        let start = Instant::now();
         println!("P3");
         println!("{} {}", self.image_width, self.image_height);
         println!("255");
@@ -109,7 +111,9 @@ impl Camera {
             }
         }
 
+        let duration = start.elapsed();
         eprintln!("Done.");
+        eprintln!("Render time: {:?}", duration);
     }
 
     pub fn get_ray(&self, i: i32, j: i32) -> Ray {

@@ -1,5 +1,3 @@
-use std::time::Instant;
-
 use bvh::BVHNode;
 use material::Dielectric;
 use rand::Rng;
@@ -97,10 +95,7 @@ fn perlin_spheres() {
 
     // Render
 
-    let start = Instant::now();
     cam.render(&world);
-    let duration = start.elapsed();
-    eprintln!("Render time: {:?}", duration);
 }
 
 fn earth() {
@@ -143,10 +138,7 @@ fn earth() {
 
     // Render
 
-    let start = Instant::now();
     cam.render(&world);
-    let duration = start.elapsed();
-    eprintln!("Render time: {:?}", duration);
 }
 
 fn checkered_spheres() {
@@ -206,10 +198,7 @@ fn checkered_spheres() {
 
     // Render
 
-    let start = Instant::now();
     cam.render(&world);
-    let duration = start.elapsed();
-    eprintln!("Render time: {:?}", duration);
 }
 
 fn bouncing_spheres() {
@@ -318,8 +307,5 @@ fn bouncing_spheres() {
 
     // Render
 
-    let start = Instant::now();
     cam.render(&bvh);
-    let duration = start.elapsed();
-    eprintln!("Render time: {:?}", duration);
 }
