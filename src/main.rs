@@ -4,7 +4,7 @@ use bvh::BVHNode;
 use material::Dielectric;
 use rand::Rng;
 use rtw_stb_image::ImageTexture;
-use texture::CheckerTexture;
+use texture::{CheckerTexture, PerlinNoise};
 
 use crate::camera::Camera;
 use crate::color::Color;
@@ -22,6 +22,7 @@ mod hittable;
 mod hittable_list;
 mod interval;
 mod material;
+mod perlin;
 mod ray;
 mod rtw_stb_image;
 mod sphere;
@@ -29,17 +30,77 @@ mod texture;
 mod vec3;
 
 fn main() {
-    match 1 {
+    match 4 {
         1 => {
             earth();
         }
         2 => {
             checkered_spheres();
         }
-        _ => {
+        3 => {
             bouncing_spheres();
         }
+        4 => {
+            perlin_spheres();
+        }
+        _ => {
+            hello();
+        }
     }
+}
+
+fn hello() {
+    eprintln!("Hello")
+}
+
+fn perlin_spheres() {
+    let mut world = HittableList::new();
+    let pertext1 = Box::new(PerlinNoise::new());
+    let pertext2 = Box::new(PerlinNoise::new());
+    let mat1 = Box::new(Lambertian::new(pertext1));
+    let mat2 = Box::new(Lambertian::new(pertext2));
+    let sphere1 = Box::new(Sphere::new_static(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        mat1,
+    ));
+    let sphere2 = Box::new(Sphere::new_static(Point3::new(0.0, 2.0, 0.0), 2.0, mat2));
+
+    world.add(sphere1);
+    world.add(sphere2);
+
+    let aspect_ratio: f64 = 16.0 / 9.0;
+    let image_width: f64 = 800.0;
+    let samples_per_pixel = 100;
+    let max_depth = 50;
+
+    let vfov = 20;
+    let lookfrom = Point3::new(13.0, 2.0, 3.0);
+    let lookat = Point3::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
+
+    // Render
+
+    let start = Instant::now();
+    cam.render(&world);
+    let duration = start.elapsed();
+    eprintln!("Render time: {:?}", duration);
 }
 
 fn earth() {

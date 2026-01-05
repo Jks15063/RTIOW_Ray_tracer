@@ -1,4 +1,5 @@
 use crate::color::Color;
+use crate::perlin::Perlin;
 use crate::vec3::Point3;
 
 pub trait Texture {
@@ -64,5 +65,23 @@ impl Texture for CheckerTexture {
         } else {
             self.odd.value(u, v, p)
         }
+    }
+}
+
+pub struct PerlinNoise {
+    noise: Perlin,
+}
+
+impl PerlinNoise {
+    pub fn new() -> Self {
+        Self {
+            noise: Perlin::new(),
+        }
+    }
+}
+
+impl Texture for PerlinNoise {
+    fn value(&self, u: f64, v: f64, p: Point3) -> Color {
+        Color::new(1.0, 1.0, 1.0) * self.noise.noise(p)
     }
 }
