@@ -30,15 +30,15 @@ mod texture;
 mod vec3;
 
 fn main() {
-    match 5 {
+    match 6 {
         1 => {
-            earth();
+            bouncing_spheres();
         }
         2 => {
             checkered_spheres();
         }
         3 => {
-            bouncing_spheres();
+            earth();
         }
         4 => {
             perlin_spheres();
@@ -46,10 +46,95 @@ fn main() {
         5 => {
             quads();
         }
+        6 => {
+            mirrors();
+        }
         _ => {
             ();
         }
     }
+}
+
+fn mirrors() {
+    let mut world = HittableList::new();
+
+    let red = Box::new(Lambertian::from_color(Color::new(1.0, 0.0, 0.0)));
+    let left_mirror = Box::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
+    let back_mirror = Box::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
+    let right_mirror = Box::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
+    let upper_mirror = Box::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
+    let lower_mirror = Box::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
+
+    world.add(Box::new(Sphere::new_static(
+        Point3::new(0.0, 0.0, 3.0),
+        1.0,
+        red,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point3::new(-3.0, -2.0, 5.0),
+        Vec3::new(0.0, 0.0, -4.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        left_mirror,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point3::new(-2.0, -2.0, 0.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        back_mirror,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point3::new(3.0, -2.0, 1.0),
+        Vec3::new(0.0, 0.0, 4.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        right_mirror,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point3::new(-2.0, 3.0, 1.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 4.0),
+        upper_mirror,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point3::new(-2.0, -3.0, 5.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -4.0),
+        lower_mirror,
+    )));
+
+    let aspect_ratio: f64 = 1.0;
+    let image_width: f64 = 800.0;
+    let samples_per_pixel = 100;
+    let max_depth = 50;
+
+    let vfov = 80;
+    let lookfrom = Point3::new(2.0, 1.0, 9.0);
+    let lookat = Point3::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
+
+    // Render
+
+    cam.render(&world);
 }
 
 fn quads() {
