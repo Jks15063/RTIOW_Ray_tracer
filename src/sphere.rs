@@ -1,7 +1,7 @@
 use core::f64;
 
 use crate::aabb::AABB;
-use crate::hittable::{HitRecord, Hittable};
+use crate::hittable::{self, HitRecord, Hittable};
 use crate::interval::Interval;
 use crate::material::Material;
 use crate::ray::Ray;

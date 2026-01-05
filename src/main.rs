@@ -1,5 +1,6 @@
 use bvh::BVHNode;
 use material::Dielectric;
+use quad::Quad;
 use rand::Rng;
 use rtw_stb_image::ImageTexture;
 use texture::{CheckerTexture, PerlinNoise};
@@ -21,6 +22,7 @@ mod hittable_list;
 mod interval;
 mod material;
 mod perlin;
+mod quad;
 mod ray;
 mod rtw_stb_image;
 mod sphere;
@@ -28,7 +30,7 @@ mod texture;
 mod vec3;
 
 fn main() {
-    match 4 {
+    match 5 {
         1 => {
             earth();
         }
@@ -41,14 +43,88 @@ fn main() {
         4 => {
             perlin_spheres();
         }
+        5 => {
+            quads();
+        }
         _ => {
-            hello();
+            ();
         }
     }
 }
 
-fn hello() {
-    eprintln!("Hello")
+fn quads() {
+    let mut world = HittableList::new();
+
+    let left_red = Box::new(Lambertian::from_color(Color::new(1.0, 0.2, 0.2)));
+    let back_green = Box::new(Lambertian::from_color(Color::new(0.2, 1.0, 0.2)));
+    let right_blue = Box::new(Lambertian::from_color(Color::new(0.2, 0.2, 1.0)));
+    let upper_orange = Box::new(Lambertian::from_color(Color::new(1.0, 0.5, 0.0)));
+    let lower_teal = Box::new(Lambertian::from_color(Color::new(0.2, 0.8, 0.8)));
+
+    world.add(Box::new(Quad::new(
+        Point3::new(-3.0, -2.0, 5.0),
+        Vec3::new(0.0, 0.0, -4.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        left_red,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point3::new(-2.0, -2.0, 0.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        back_green,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point3::new(3.0, -2.0, 1.0),
+        Vec3::new(0.0, 0.0, 4.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        right_blue,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point3::new(-2.0, 3.0, 1.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 4.0),
+        upper_orange,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point3::new(-2.0, -3.0, 5.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -4.0),
+        lower_teal,
+    )));
+
+    let aspect_ratio: f64 = 1.0;
+    let image_width: f64 = 800.0;
+    let samples_per_pixel = 100;
+    let max_depth = 50;
+
+    let vfov = 80;
+    let lookfrom = Point3::new(0.0, 0.0, 9.0);
+    let lookat = Point3::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
+
+    // Render
+
+    cam.render(&world);
 }
 
 fn perlin_spheres() {

@@ -19,6 +19,8 @@ impl AABB {
     }
 
     pub fn from_intervals(x: Interval, y: Interval, z: Interval) -> Self {
+        let (x, y, z) = pad_to_minimus(x, y, z);
+
         Self { x, y, z }
     }
 
@@ -41,6 +43,8 @@ impl AABB {
             Interval::new(b[2], a[2])
         };
 
+        let (x, y, z) = pad_to_minimus(x, y, z);
+
         Self { x, y, z }
     }
 
@@ -48,6 +52,7 @@ impl AABB {
         let x = Interval::from_intervals(box0.x, box1.x);
         let y = Interval::from_intervals(box0.y, box1.y);
         let z = Interval::from_intervals(box0.z, box1.z);
+        let (x, y, z) = pad_to_minimus(x, y, z);
 
         Self { x, y, z }
     }
@@ -111,4 +116,16 @@ impl AABB {
             2
         }
     }
+}
+
+fn pad_to_minimus(x: Interval, y: Interval, z: Interval) -> (Interval, Interval, Interval) {
+    let delta = 0.0001;
+
+    let x = if x.size() < delta { x.expand(delta) } else { x };
+
+    let y = if y.size() < delta { y.expand(delta) } else { y };
+
+    let z = if z.size() < delta { z.expand(delta) } else { z };
+
+    (x, y, z)
 }
