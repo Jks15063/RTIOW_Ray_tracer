@@ -55,8 +55,8 @@ fn hello() {
 
 fn perlin_spheres() {
     let mut world = HittableList::new();
-    let pertext1 = Box::new(PerlinNoise::new());
-    let pertext2 = Box::new(PerlinNoise::new());
+    let pertext1 = Box::new(PerlinNoise::new(4.0));
+    let pertext2 = Box::new(PerlinNoise::new(4.0));
     let mat1 = Box::new(Lambertian::new(pertext1));
     let mat2 = Box::new(Lambertian::new(pertext2));
     let sphere1 = Box::new(Sphere::new_static(
