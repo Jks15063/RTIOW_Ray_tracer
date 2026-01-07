@@ -1,5 +1,6 @@
 use crate::aabb::AABB;
 use crate::hittable::{HitRecord, Hittable};
+use crate::hittable_list::HittableList;
 use crate::interval::Interval;
 use crate::material::Material;
 use crate::ray::Ray;
@@ -90,6 +91,70 @@ impl Hittable for Quad {
     fn bounding_box(&self) -> AABB {
         self.bbox
     }
+}
+
+pub fn make_box<F>(a: Point3, b: Point3, mut make_mat: F) -> Box<dyn Hittable>
+where
+    F: FnMut() -> Box<dyn Material>,
+{
+    let mut sides = HittableList::new();
+
+    let min = Point3::new(a.x().min(b.x()), a.y().min(b.y()), a.z().min(b.z()));
+    let max = Point3::new(a.x().max(b.x()), a.y().max(b.y()), a.z().max(b.z()));
+
+    let dx = Vec3::new(max.x() - min.x(), 0.0, 0.0);
+    let dy = Vec3::new(0.0, max.y() - min.y(), 0.0);
+    let dz = Vec3::new(0.0, 0.0, max.z() - min.z());
+
+    //front
+    sides.add(Box::new(Quad::new(
+        Point3::new(min.x(), min.y(), max.z()),
+        dx,
+        dy,
+        make_mat(),
+    )));
+
+    //right
+    sides.add(Box::new(Quad::new(
+        Point3::new(max.x(), min.y(), max.z()),
+        -dz,
+        dy,
+        make_mat(),
+    )));
+
+    //back
+    sides.add(Box::new(Quad::new(
+        Point3::new(max.x(), min.y(), min.z()),
+        -dx,
+        dy,
+        make_mat(),
+    )));
+
+    //left
+    sides.add(Box::new(Quad::new(
+        Point3::new(min.x(), min.y(), min.z()),
+        dz,
+        dy,
+        make_mat(),
+    )));
+
+    //top
+    sides.add(Box::new(Quad::new(
+        Point3::new(min.x(), max.y(), max.z()),
+        dx,
+        -dz,
+        make_mat(),
+    )));
+
+    //bottom
+    sides.add(Box::new(Quad::new(
+        Point3::new(min.x(), min.y(), min.z()),
+        dx,
+        dz,
+        make_mat(),
+    )));
+
+    Box::new(sides)
 }
 
 fn set_bounding_box(Q: Point3, u: Vec3, v: Vec3) -> AABB {

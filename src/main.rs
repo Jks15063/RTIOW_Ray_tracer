@@ -113,12 +113,26 @@ fn cornell_box() {
         white3,
     ));
 
+    let box1 = quad::make_box(
+        Point3::new(130.0, 0.0, 65.0),
+        Point3::new(295.0, 165.0, 230.0),
+        || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
+    );
+
+    let box2 = quad::make_box(
+        Point3::new(265.0, 0.0, 295.0),
+        Point3::new(430.0, 330.0, 460.0),
+        || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
+    );
+
     world.add(quad1);
     world.add(quad2);
     world.add(quad3);
     world.add(quad4);
     world.add(quad5);
     world.add(quad6);
+    world.add(box1);
+    world.add(box2);
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
