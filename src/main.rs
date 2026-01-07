@@ -30,7 +30,7 @@ mod texture;
 mod vec3;
 
 fn main() {
-    match 7 {
+    match 8 {
         1 => {
             bouncing_spheres();
         }
@@ -52,10 +52,105 @@ fn main() {
         7 => {
             simple_light();
         }
+        8 => {
+            cornell_box();
+        }
         _ => {
             ();
         }
     }
+}
+
+fn cornell_box() {
+    let mut world = HittableList::new();
+
+    let red = Box::new(Lambertian::from_color(Color::new(0.65, 0.05, 0.05)));
+    let white1 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let white2 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let white3 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let green = Box::new(Lambertian::from_color(Color::new(0.12, 0.45, 0.15)));
+    let light = Box::new(DiffuseLight::from_color(Color::new(15.0, 15.0, 15.0)));
+
+    let quad1 = Box::new(Quad::new(
+        Point3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        green,
+    ));
+
+    let quad2 = Box::new(Quad::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        red,
+    ));
+
+    let quad3 = Box::new(Quad::new(
+        Point3::new(343.0, 554.0, 332.0),
+        Vec3::new(-130.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -105.0),
+        light,
+    ));
+
+    let quad4 = Box::new(Quad::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        white1,
+    ));
+
+    let quad5 = Box::new(Quad::new(
+        Point3::new(555.0, 555.0, 555.0),
+        Vec3::new(-555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -555.0),
+        white2,
+    ));
+
+    let quad6 = Box::new(Quad::new(
+        Point3::new(0.0, 0.0, 555.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        white3,
+    ));
+
+    world.add(quad1);
+    world.add(quad2);
+    world.add(quad3);
+    world.add(quad4);
+    world.add(quad5);
+    world.add(quad6);
+
+    let aspect_ratio: f64 = 1.0;
+    let image_width: f64 = 600.0;
+    let samples_per_pixel = 200;
+    let max_depth = 50;
+    let background = Color::new(0.0, 0.0, 0.0);
+
+    let vfov = 40;
+    let lookfrom = Point3::new(278.0, 278.0, -800.0);
+    let lookat = Point3::new(278.0, 278.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        background,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
+
+    // Render
+
+    cam.render(&world);
 }
 
 fn simple_light() {
