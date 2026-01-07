@@ -4,10 +4,16 @@ use crate::color::Color;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
 use crate::texture::{SolidColor, Texture};
-use crate::vec3;
+use crate::vec3::{self, Point3};
 
 pub trait Material {
-    fn scatter(&self, r_in: Ray, rec: HitRecord) -> Option<(Color, Ray)>;
+    fn scatter(&self, _r_in: Ray, _rec: HitRecord) -> Option<(Color, Ray)> {
+        None
+    }
+
+    fn emitted(&self, _u: f64, _v: f64, _p: Point3) -> Color {
+        Color::new(0.0, 0.0, 0.0)
+    }
 }
 
 pub struct Lambertian {
@@ -105,4 +111,26 @@ fn reflectance(cosine: f64, refraction_index: f64) -> f64 {
     let r0 = (1.0 - refraction_index) / (1.0 + refraction_index).powi(2);
 
     r0 + (1.0 - r0) * (1.0 - cosine).powi(5)
+}
+
+pub struct DiffuseLight {
+    tex: Box<dyn Texture>,
+}
+
+impl DiffuseLight {
+    pub fn new(tex: Box<dyn Texture>) -> Self {
+        Self { tex }
+    }
+
+    pub fn from_color(albedo: Color) -> Self {
+        Self {
+            tex: Box::new(SolidColor::new(albedo)),
+        }
+    }
+}
+
+impl Material for DiffuseLight {
+    fn emitted(&self, u: f64, v: f64, p: Point3) -> Color {
+        self.tex.value(u, v, p)
+    }
 }

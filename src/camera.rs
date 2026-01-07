@@ -1,4 +1,5 @@
 use core::f64;
+use rand::Rng;
 use std::time::Instant;
 
 use crate::color::{self, Color};
@@ -6,7 +7,6 @@ use crate::hittable::Hittable;
 use crate::interval::Interval;
 use crate::ray::Ray;
 use crate::vec3::{self, Point3, Vec3};
-use rand::Rng;
 
 pub struct Camera {
     image_height: i32,
@@ -18,6 +18,7 @@ pub struct Camera {
     samples_per_pixel: i32,
     pixel_samples_scale: f64,
     max_depth: i32,
+    background: Color,
     u: Vec3,
     v: Vec3,
     w: Vec3,
@@ -32,6 +33,7 @@ impl Camera {
         image_width: f64,
         samples_per_pixel: i32,
         max_depth: i32,
+        background: Color,
         vfov: i32,
         lookfrom: Point3,
         lookat: Point3,
@@ -79,6 +81,7 @@ impl Camera {
             samples_per_pixel,
             pixel_samples_scale,
             max_depth,
+            background,
             u,
             v,
             w,
@@ -101,7 +104,7 @@ impl Camera {
 
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
-                    pixel_color += ray_color(r, self.max_depth, world);
+                    pixel_color += ray_color(r, self.max_depth, world, self.background);
                 }
 
                 println!(
@@ -152,19 +155,22 @@ fn sample_square() -> Vec3 {
     Vec3::new(x - 0.5, y - 0.5, 0.0)
 }
 
-fn ray_color(r: Ray, depth: i32, world: &dyn Hittable) -> Color {
+fn ray_color(r: Ray, depth: i32, world: &dyn Hittable, background: Color) -> Color {
     if depth <= 0 {
         return Color::new(0.0, 0.0, 0.0);
     }
 
     if let Some(rec) = world.hit(&r, Interval::new(0.001, f64::INFINITY)) {
+        let color_from_emission = rec.mat.emitted(rec.u, rec.v, rec.p);
+
         if let Some((attenuation, scattered)) = rec.mat.scatter(r, rec) {
-            return attenuation * ray_color(scattered, depth - 1, world);
+            let color_from_scatter =
+                attenuation * ray_color(scattered, depth - 1, world, background);
+
+            return color_from_emission + color_from_scatter;
         }
-        return Color::new(0.0, 0.0, 0.0);
+        return color_from_emission;
     }
 
-    let unit_direction = vec3::unit_vector(r.direction());
-    let a = 0.5 * (unit_direction.y() + 1.0);
-    (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
+    background
 }

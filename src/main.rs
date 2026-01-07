@@ -1,5 +1,5 @@
 use bvh::BVHNode;
-use material::Dielectric;
+use material::{Dielectric, DiffuseLight};
 use quad::Quad;
 use rand::Rng;
 use rtw_stb_image::ImageTexture;
@@ -30,7 +30,7 @@ mod texture;
 mod vec3;
 
 fn main() {
-    match 6 {
+    match 7 {
         1 => {
             bouncing_spheres();
         }
@@ -49,10 +49,83 @@ fn main() {
         6 => {
             mirrors();
         }
+        7 => {
+            simple_light();
+        }
         _ => {
             ();
         }
     }
+}
+
+fn simple_light() {
+    let mut world = HittableList::new();
+
+    let pertext1 = Box::new(PerlinNoise::new(4.0));
+    let pertext2 = Box::new(PerlinNoise::new(4.0));
+    let mat1 = Box::new(Lambertian::new(pertext1));
+    let mat2 = Box::new(Lambertian::new(pertext2));
+
+    let sphere1 = Box::new(Sphere::new_static(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        mat1,
+    ));
+
+    let sphere2 = Box::new(Sphere::new_static(Point3::new(0.0, 2.0, 0.0), 2.0, mat2));
+
+    let difflight_mat1 = Box::new(DiffuseLight::from_color(Color::new(4.0, 4.0, 4.0)));
+    let difflight_mat2 = Box::new(DiffuseLight::from_color(Color::new(4.0, 4.0, 4.0)));
+
+    let quad_light = Box::new(Quad::new(
+        Point3::new(3.0, 1.0, -2.0),
+        Vec3::new(2.0, 0.0, 0.0),
+        Vec3::new(0.0, 2.0, 0.0),
+        difflight_mat1,
+    ));
+
+    let sphere_light = Box::new(Sphere::new_static(
+        Point3::new(0.0, 7.0, 0.0),
+        2.0,
+        difflight_mat2,
+    ));
+
+    world.add(sphere1);
+    world.add(sphere2);
+    world.add(quad_light);
+    world.add(sphere_light);
+
+    let aspect_ratio: f64 = 16.0 / 9.0;
+    let image_width: f64 = 800.0;
+    let samples_per_pixel = 100;
+    let max_depth = 50;
+    let background = Color::new(0.0, 0.0, 0.0);
+
+    let vfov = 20;
+    let lookfrom = Point3::new(26.0, 3.0, 6.0);
+    let lookat = Point3::new(0.0, 2.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        background,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
+
+    // Render
+
+    cam.render(&world);
 }
 
 fn mirrors() {
@@ -110,6 +183,7 @@ fn mirrors() {
     let image_width: f64 = 800.0;
     let samples_per_pixel = 100;
     let max_depth = 50;
+    let background = Color::new(0.70, 0.80, 1.00);
 
     let vfov = 80;
     let lookfrom = Point3::new(2.0, 1.0, 9.0);
@@ -124,6 +198,7 @@ fn mirrors() {
         image_width,
         samples_per_pixel,
         max_depth,
+        background,
         vfov,
         lookfrom,
         lookat,
@@ -185,6 +260,7 @@ fn quads() {
     let image_width: f64 = 800.0;
     let samples_per_pixel = 100;
     let max_depth = 50;
+    let background = Color::new(0.70, 0.80, 1.00);
 
     let vfov = 80;
     let lookfrom = Point3::new(0.0, 0.0, 9.0);
@@ -199,6 +275,7 @@ fn quads() {
         image_width,
         samples_per_pixel,
         max_depth,
+        background,
         vfov,
         lookfrom,
         lookat,
@@ -232,6 +309,7 @@ fn perlin_spheres() {
     let image_width: f64 = 800.0;
     let samples_per_pixel = 100;
     let max_depth = 50;
+    let background = Color::new(0.70, 0.80, 1.00);
 
     let vfov = 20;
     let lookfrom = Point3::new(13.0, 2.0, 3.0);
@@ -246,6 +324,7 @@ fn perlin_spheres() {
         image_width,
         samples_per_pixel,
         max_depth,
+        background,
         vfov,
         lookfrom,
         lookat,
@@ -275,6 +354,7 @@ fn earth() {
     let image_width: f64 = 800.0;
     let samples_per_pixel = 100;
     let max_depth = 50;
+    let background = Color::new(0.70, 0.80, 1.00);
 
     let vfov = 20;
     let lookfrom = Point3::new(0.0, 0.0, 12.0);
@@ -289,6 +369,7 @@ fn earth() {
         image_width,
         samples_per_pixel,
         max_depth,
+        background,
         vfov,
         lookfrom,
         lookat,
@@ -335,6 +416,7 @@ fn checkered_spheres() {
     let image_width: f64 = 800.0;
     let samples_per_pixel = 100;
     let max_depth = 50;
+    let background = Color::new(0.70, 0.80, 1.00);
 
     let vfov = 20;
     let lookfrom = Point3::new(13.0, 2.0, 3.0);
@@ -349,6 +431,7 @@ fn checkered_spheres() {
         image_width,
         samples_per_pixel,
         max_depth,
+        background,
         vfov,
         lookfrom,
         lookat,
@@ -444,6 +527,7 @@ fn bouncing_spheres() {
     let image_width: f64 = 800.0;
     let samples_per_pixel = 100;
     let max_depth = 50;
+    let background = Color::new(0.70, 0.80, 1.00);
 
     let vfov = 20;
     let lookfrom = Point3::new(13.0, 2.0, 3.0);
@@ -458,6 +542,7 @@ fn bouncing_spheres() {
         image_width,
         samples_per_pixel,
         max_depth,
+        background,
         vfov,
         lookfrom,
         lookat,
