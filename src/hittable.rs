@@ -2,7 +2,6 @@ use crate::aabb::AABB;
 use crate::interval::Interval;
 use crate::material::Material;
 use crate::ray::Ray;
-use crate::vec3;
 use crate::vec3::{Point3, Vec3};
 
 pub struct HitRecord<'a> {
@@ -37,17 +36,40 @@ impl<'a> HitRecord<'a> {
     }
 }
 
+pub struct Translate {
+    object: Box<dyn Hittable>,
+    offset: Vec3,
+    bbox: AABB,
+}
+
+impl Translate {
+    pub fn new(object: Box<dyn Hittable>, offset: Vec3) -> Self {
+        let bbox = object.bounding_box() + offset;
+
+        Self {
+            object,
+            offset,
+            bbox,
+        }
+    }
+}
+
+impl Hittable for Translate {
+    fn hit(&self, r: &Ray, ray_t: Interval) -> Option<HitRecord<'_>> {
+        let offset_r = Ray::new(r.origin() - self.offset, r.direction(), r.time());
+
+        self.object.hit(&offset_r, ray_t).map(|mut rec| {
+            rec.p += self.offset;
+            rec
+        })
+    }
+
+    fn bounding_box(&self) -> AABB {
+        self.bbox
+    }
+}
+
 pub trait Hittable {
     fn hit(&self, r: &Ray, ray_t: Interval) -> Option<HitRecord<'_>>;
     fn bounding_box(&self) -> AABB;
 }
-
-// pub fn set_face_normal(r: &Ray, outward_normal: Vec3) -> Vec3 {
-//     let front_face = vec3::dot(r.direction(), outward_normal) < 0.0;
-
-//     if front_face {
-//         outward_normal
-//     } else {
-//         -outward_normal
-//     }
-// }
