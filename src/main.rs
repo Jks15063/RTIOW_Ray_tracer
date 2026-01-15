@@ -141,8 +141,8 @@ fn cornell_box() {
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
-    let samples_per_pixel = 200;
-    let max_depth = 50;
+    let samples_per_pixel = 300;
+    let max_depth = 100;
     let background = Color::new(0.0, 0.0, 0.0);
 
     let vfov = 40;
