@@ -118,6 +118,7 @@ fn cornell_box() {
         Point3::new(0.0, 0.0, 0.0),
         Point3::new(165.0, 330.0, 165.0),
         || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
+        // || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
     );
     let box1 = Box::new(RotateY::new(box1, 15.0));
     let box1 = Box::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));
@@ -141,8 +142,8 @@ fn cornell_box() {
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
-    let samples_per_pixel = 300;
-    let max_depth = 100;
+    let samples_per_pixel = 800;
+    let max_depth = 500;
     let background = Color::new(0.0, 0.0, 0.0);
 
     let vfov = 40;
