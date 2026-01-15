@@ -7,9 +7,9 @@ use crate::vec3::Vec3;
 
 #[derive(Copy, Clone)]
 pub struct AABB {
-    x: Interval,
-    y: Interval,
-    z: Interval,
+    pub x: Interval,
+    pub y: Interval,
+    pub z: Interval,
 }
 
 impl AABB {

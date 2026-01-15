@@ -5,6 +5,7 @@ use std::ops::AddAssign;
 use std::ops::Div;
 use std::ops::DivAssign;
 use std::ops::Index;
+use std::ops::IndexMut;
 use std::ops::Mul;
 use std::ops::MulAssign;
 use std::ops::Neg;
@@ -133,8 +134,14 @@ impl fmt::Display for Vec3 {
 impl Index<usize> for Vec3 {
     type Output = f64;
 
-    fn index(&self, i: usize) -> &f64 {
-        &self.e[i]
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.e[index]
+    }
+}
+
+impl IndexMut<usize> for Vec3 {
+    fn index_mut(&mut self, index: usize) -> &mut f64 {
+        &mut self.e[index]
     }
 }
 

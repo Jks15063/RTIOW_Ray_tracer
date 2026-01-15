@@ -1,4 +1,5 @@
 use bvh::BVHNode;
+use hittable::{RotateY, Translate};
 use material::{Dielectric, DiffuseLight};
 use quad::Quad;
 use rand::Rng;
@@ -114,16 +115,20 @@ fn cornell_box() {
     ));
 
     let box1 = quad::make_box(
-        Point3::new(130.0, 0.0, 65.0),
-        Point3::new(295.0, 165.0, 230.0),
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 330.0, 165.0),
         || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
     );
+    let box1 = Box::new(RotateY::new(box1, 15.0));
+    let box1 = Box::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));
 
     let box2 = quad::make_box(
-        Point3::new(265.0, 0.0, 295.0),
-        Point3::new(430.0, 330.0, 460.0),
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 165.0, 165.0),
         || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
     );
+    let box2 = Box::new(RotateY::new(box2, -18.0));
+    let box2 = Box::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
 
     world.add(quad1);
     world.add(quad2);
