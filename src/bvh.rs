@@ -1,5 +1,3 @@
-use rand::Rng;
-
 use crate::aabb::AABB;
 use crate::hittable::{HitRecord, Hittable};
 use crate::hittable_list::HittableList;
