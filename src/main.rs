@@ -30,10 +30,11 @@ mod ray;
 mod rtw_stb_image;
 mod sphere;
 mod texture;
+mod triangle;
 mod vec3;
 
 fn main() {
-    match 10 {
+    match 8 {
         1 => {
             bouncing_spheres();
         }
@@ -62,7 +63,7 @@ fn main() {
             cornell_smoke();
         }
         10 => {
-            final_scene(800, 10000, 40);
+            final_scene(800, 1000, 40);
         }
         _ => {
             ();
@@ -417,8 +418,8 @@ fn cornell_box() {
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
-    let samples_per_pixel = 800;
-    let max_depth = 500;
+    let samples_per_pixel = 100;
+    let max_depth = 50;
     let background = Color::new(0.0, 0.0, 0.0);
 
     let vfov = 40;

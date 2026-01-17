@@ -17,16 +17,6 @@ pub struct Quad {
     D: f64,
 }
 
-fn is_interior(a: f64, b: f64) -> bool {
-    let unit_interval = Interval::new(0.0, 1.0);
-
-    if !unit_interval.contains(a) || !unit_interval.contains(b) {
-        return false;
-    }
-
-    true
-}
-
 impl Quad {
     pub fn new(Q: Point3, u: Vec3, v: Vec3, mat: Box<dyn Material>) -> Self {
         let bbox = set_bounding_box(Q, u, v);
@@ -162,4 +152,14 @@ fn set_bounding_box(Q: Point3, u: Vec3, v: Vec3) -> AABB {
     let bbox_diagonal2 = AABB::from_points(Q + u, Q + v);
 
     AABB::from_aabb(bbox_diagonal1, bbox_diagonal2)
+}
+
+fn is_interior(a: f64, b: f64) -> bool {
+    let unit_interval = Interval::new(0.0, 1.0);
+
+    if !unit_interval.contains(a) || !unit_interval.contains(b) {
+        return false;
+    }
+
+    true
 }
