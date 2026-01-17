@@ -119,7 +119,7 @@ impl Camera {
         eprintln!("Render time: {:?}", duration);
     }
 
-    pub fn get_ray(&self, i: i32, j: i32) -> Ray {
+    fn get_ray(&self, i: i32, j: i32) -> Ray {
         let offset = sample_square();
         let pixel_sample = self.pixel00_loc
             + ((i as f64 + offset.x()) * self.pixel_delta_u)
