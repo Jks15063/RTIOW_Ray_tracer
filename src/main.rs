@@ -1,19 +1,19 @@
-use bvh::BVHNode;
-use constant_medium::ConstantMedium;
-use hittable::{RotateY, Translate};
-use material::{Dielectric, DiffuseLight};
-use quad::Quad;
-use rand::Rng;
-use rtw_stb_image::ImageTexture;
-use texture::{CheckerTexture, PerlinNoise};
-
+use crate::bvh::BVHNode;
 use crate::camera::Camera;
 use crate::color::Color;
+use crate::constant_medium::ConstantMedium;
+use crate::hittable::{RotateY, Translate};
 use crate::hittable_list::HittableList;
+use crate::material::{Dielectric, DiffuseLight};
 use crate::material::{Lambertian, Metal};
+use crate::quad::Quad;
+use crate::rtw_stb_image::ImageTexture;
 use crate::sphere::Sphere;
+use crate::texture::{CheckerTexture, PerlinNoise};
+use crate::triangle::Triangle;
 use crate::vec3::{Point3, Vec3};
 use core::f64;
+use rand::Rng;
 
 mod aabb;
 mod bvh;
@@ -34,7 +34,7 @@ mod triangle;
 mod vec3;
 
 fn main() {
-    match 8 {
+    match 11 {
         1 => {
             bouncing_spheres();
         }
@@ -65,10 +65,61 @@ fn main() {
         10 => {
             final_scene(800, 1000, 40);
         }
+        11 => {
+            triangle_test();
+        }
         _ => {
             ();
         }
     }
+}
+
+fn triangle_test() {
+    let mut world = HittableList::new();
+
+    let red = Box::new(Lambertian::from_color(Color::new(1.0, 0.2, 0.2)));
+    let green = Box::new(Lambertian::from_color(Color::new(0.2, 1.0, 0.2)));
+
+    let red_triangle = Box::new(Triangle::new(
+        Point3::new(0.0, 0.0, -1.0), // bottom center
+        Point3::new(1.0, 0.0, -1.0), // bottom right
+        Point3::new(0.5, 1.0, -1.0), // top middle
+        red,
+    ));
+
+    world.add(red_triangle);
+
+    let aspect_ratio: f64 = 1.0;
+    let image_width: f64 = 800.0;
+    let samples_per_pixel = 100;
+    let max_depth = 50;
+    let background = Color::new(0.70, 0.80, 1.00);
+
+    let vfov = 80;
+    let lookfrom = Point3::new(0.5, 0.33, 0.0);
+    let lookat = Point3::new(0.5, 0.33, -1.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        background,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
+
+    // Render
+
+    cam.render(&world);
 }
 
 fn final_scene(image_width: i32, samples_per_pixel: i32, max_depth: i32) {
