@@ -6,6 +6,7 @@ use crate::hittable::{RotateY, Translate};
 use crate::hittable_list::HittableList;
 use crate::material::{Dielectric, DiffuseLight};
 use crate::material::{Lambertian, Metal};
+use crate::obj_loader::load_obj;
 use crate::quad::Quad;
 use crate::rtw_stb_image::ImageTexture;
 use crate::sphere::Sphere;
@@ -14,6 +15,7 @@ use crate::triangle::Triangle;
 use crate::vec3::{Point3, Vec3};
 use core::f64;
 use rand::Rng;
+use std::sync::Arc;
 
 mod aabb;
 mod bvh;
@@ -24,6 +26,7 @@ mod hittable;
 mod hittable_list;
 mod interval;
 mod material;
+mod obj_loader;
 mod perlin;
 mod quad;
 mod ray;
@@ -66,7 +69,7 @@ fn main() {
             final_scene(800, 1000, 40);
         }
         11 => {
-            triangle_test();
+            teapot_box();
         }
         _ => {
             ();
@@ -74,30 +77,80 @@ fn main() {
     }
 }
 
-fn triangle_test() {
+fn teapot_box() {
     let mut world = HittableList::new();
 
-    let red = Box::new(Lambertian::from_color(Color::new(1.0, 0.2, 0.2)));
-    let green = Box::new(Lambertian::from_color(Color::new(0.2, 1.0, 0.2)));
+    let red = Box::new(Lambertian::from_color(Color::new(0.65, 0.05, 0.05)));
+    let white1 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let white2 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let white3 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let green = Box::new(Lambertian::from_color(Color::new(0.12, 0.45, 0.15)));
+    let light = Box::new(DiffuseLight::from_color(Color::new(15.0, 15.0, 15.0)));
 
-    let red_triangle = Box::new(Triangle::new(
-        Point3::new(0.0, 0.0, -1.0), // bottom center
-        Point3::new(1.0, 0.0, -1.0), // bottom right
-        Point3::new(0.5, 1.0, -1.0), // top middle
+    let quad1 = Box::new(Quad::new(
+        Point3::new(2.0, 0.0, -5.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        green,
+    ));
+
+    let quad2 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, -5.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
         red,
     ));
 
-    world.add(red_triangle);
+    let quad3 = Box::new(Quad::new(
+        Point3::new(-1.0, 9.9, 1.0),
+        Vec3::new(-2.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -2.0),
+        light,
+    ));
+
+    let quad4 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, -5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        white1,
+    ));
+
+    let quad5 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, 5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        white2,
+    ));
+
+    let quad6 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, 5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        white3,
+    ));
+
+    let teapot_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
+    let teapot = Box::new(load_obj("teapot.obj", teapot_mat));
+    let teapot = Box::new(Translate::new(teapot, Vec3::new(-2.5, 0.0, -2.5)));
+
+    world.add(quad1);
+    world.add(quad2);
+    world.add(quad3);
+    world.add(quad4);
+    world.add(quad5);
+    world.add(quad6);
+    world.add(teapot);
+    let bvh = BVHNode::from_list(world);
 
     let aspect_ratio: f64 = 1.0;
-    let image_width: f64 = 800.0;
-    let samples_per_pixel = 100;
+    let image_width: f64 = 600.0;
+    let samples_per_pixel = 200;
     let max_depth = 50;
-    let background = Color::new(0.70, 0.80, 1.00);
+    let background = Color::new(0.0, 0.0, 0.0);
 
-    let vfov = 80;
-    let lookfrom = Point3::new(0.5, 0.33, 0.0);
-    let lookat = Point3::new(0.5, 0.33, -1.0);
+    let vfov = 40;
+    let lookfrom = Point3::new(-3.0, 3.5, -12.0);
+    let lookat = Point3::new(-3.0, 2.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
 
     let defocus_angle = 0.0;
@@ -119,7 +172,7 @@ fn triangle_test() {
 
     // Render
 
-    cam.render(&world);
+    cam.render(&bvh);
 }
 
 fn final_scene(image_width: i32, samples_per_pixel: i32, max_depth: i32) {

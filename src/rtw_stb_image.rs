@@ -1,8 +1,7 @@
 use crate::color::Color;
-use crate::interval::Interval;
 use crate::texture::Texture;
 use crate::vec3::Point3;
-use image::{GenericImageView, Pixel};
+use image::GenericImageView;
 
 pub struct ImageTexture {
     image: image::DynamicImage,
@@ -17,7 +16,7 @@ impl ImageTexture {
 }
 
 impl Texture for ImageTexture {
-    fn value(&self, u: f64, v: f64, p: Point3) -> Color {
+    fn value(&self, u: f64, v: f64, _p: Point3) -> Color {
         if self.image.height() <= 0 {
             return Color::new(0.0, 1.0, 1.0);
         }

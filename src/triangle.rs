@@ -4,6 +4,7 @@ use crate::interval::Interval;
 use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::{self, Point3, Vec3};
+use std::sync::Arc;
 
 pub struct Triangle {
     v0: Point3,
@@ -12,20 +13,20 @@ pub struct Triangle {
     u: Vec3,
     v: Vec3,
     w: Vec3,
-    mat: Box<dyn Material>,
+    mat: Arc<dyn Material>,
     bbox: AABB,
     normal: Vec3,
     D: f64,
 }
 
 impl Triangle {
-    pub fn new(v0: Point3, v1: Point3, v2: Point3, mat: Box<dyn Material>) -> Self {
+    pub fn new(v0: Point3, v1: Point3, v2: Point3, mat: Arc<dyn Material>) -> Self {
         let u = v1 - v0;
         let v = v2 - v0;
         let bbox = set_bounding_box(v0, v1, v2);
         let n = vec3::cross(u, v);
         let normal = vec3::unit_vector(n);
-        let D = vec3::dot(n, v0);
+        let D = vec3::dot(normal, v0);
         let w = n / vec3::dot(n, n);
 
         Self {
