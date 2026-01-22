@@ -13,8 +13,10 @@ use crate::sphere::Sphere;
 use crate::texture::{CheckerTexture, PerlinNoise};
 use crate::vec3::{Point3, Vec3};
 use core::f64;
+use hittable::Hittable;
 use rand::Rng;
 use std::sync::Arc;
+use std::time::Instant;
 
 mod aabb;
 mod bvh;
@@ -36,7 +38,7 @@ mod triangle;
 mod vec3;
 
 fn main() {
-    match 9 {
+    match 12 {
         1 => {
             bouncing_spheres();
         }
@@ -70,10 +72,116 @@ fn main() {
         11 => {
             teapot_box();
         }
+        12 => {
+            buddha_box();
+        }
         _ => {
             ();
         }
     }
+}
+
+fn buddha_box() {
+    let mut world = HittableList::new();
+
+    let red = Box::new(Lambertian::from_color(Color::new(0.65, 0.05, 0.05)));
+    let white1 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let white2 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let white3 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let green = Box::new(Lambertian::from_color(Color::new(0.12, 0.45, 0.15)));
+    let light = Box::new(DiffuseLight::from_color(Color::new(15.0, 15.0, 15.0)));
+
+    let quad1 = Box::new(Quad::new(
+        Point3::new(2.0, 0.0, -5.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        green,
+    ));
+
+    let quad2 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, -5.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        red,
+    ));
+
+    let quad3 = Box::new(Quad::new(
+        Point3::new(-1.0, 9.9, 1.0),
+        Vec3::new(-2.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -2.0),
+        light,
+    ));
+
+    let quad4 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, -5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        white1,
+    ));
+
+    let quad5 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, 5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        white2,
+    ));
+
+    let quad6 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, 5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        white3,
+    ));
+
+    let buddha_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
+    let buddha = Box::new(load_obj("buddha/buddha.obj", buddha_mat));
+    let buddha = Box::new(Translate::new(buddha, Vec3::new(-3.0, 1.0, 0.0)));
+    eprintln!("Buddha bbox: {:?}", buddha.bounding_box());
+
+    world.add(quad1);
+    world.add(quad2);
+    world.add(quad3);
+    world.add(quad4);
+    world.add(quad5);
+    world.add(quad6);
+    world.add(buddha);
+    eprintln!("Num objects: {}", world.objects.len());
+    eprintln!("Building BVH...");
+    let start = Instant::now();
+    let bvh = BVHNode::from_list(world);
+    eprintln!("BVH built in {:?}", start.elapsed());
+
+    let aspect_ratio: f64 = 1.0;
+    let image_width: f64 = 600.0;
+    let samples_per_pixel = 100;
+    let max_depth = 40;
+    let background = Color::new(0.0, 0.0, 0.0);
+
+    let vfov = 40;
+    let lookfrom = Point3::new(-3.0, 5.5, -12.0);
+    let lookat = Point3::new(-3.0, 2.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        background,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
+
+    // Render
+
+    cam.render(&bvh);
 }
 
 fn teapot_box() {
@@ -128,8 +236,8 @@ fn teapot_box() {
         white3,
     ));
 
-    // let teapot_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
-    let teapot_mat = Arc::new(Dielectric::new(1.5));
+    let teapot_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
+    // let teapot_mat = Arc::new(Dielectric::new(1.5));
     let teapot = Box::new(load_obj("teapot.obj", teapot_mat));
     let teapot = Box::new(Translate::new(teapot, Vec3::new(-3.0, 0.0, -2.5)));
 
@@ -1050,7 +1158,7 @@ fn bouncing_spheres() {
 
     let aspect_ratio: f64 = 16.0 / 9.0;
     let image_width: f64 = 800.0;
-    let samples_per_pixel = 100;
+    let samples_per_pixel = 1000;
     let max_depth = 50;
     let background = Color::new(0.70, 0.80, 1.00);
 

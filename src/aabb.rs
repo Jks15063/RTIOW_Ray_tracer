@@ -5,7 +5,7 @@ use crate::ray::Ray;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct AABB {
     pub x: Interval,
     pub y: Interval,

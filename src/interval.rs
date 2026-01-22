@@ -1,7 +1,7 @@
 use core::f64;
 use std::ops::Add;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Interval {
     pub min: f64,
     pub max: f64,
