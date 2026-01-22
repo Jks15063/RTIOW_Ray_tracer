@@ -6,7 +6,7 @@ use crate::vec3::Point3;
 use std::sync::Arc;
 use tobj;
 
-pub fn load_obj(file_name: &str, mat: Arc<dyn Material>) -> BVHNode {
+pub fn load_obj(file_name: &str, scale: f64, mat: Arc<dyn Material>) -> BVHNode {
     let options = tobj::LoadOptions {
         triangulate: true,
         single_index: true,
@@ -25,12 +25,11 @@ pub fn load_obj(file_name: &str, mat: Arc<dyn Material>) -> BVHNode {
                 let positions: Vec<Point3> = mesh
                     .positions
                     .chunks(3)
-                    // .map(|i| Point3::new(i[0] as f64, i[1] as f64, i[2] as f64))
                     .map(|i| {
                         Point3::new(
-                            i[0] as f64 * 100.0,
-                            i[1] as f64 * 100.0,
-                            i[2] as f64 * 100.0,
+                            i[0] as f64 * scale,
+                            i[1] as f64 * scale,
+                            i[2] as f64 * scale,
                         )
                     })
                     .collect();

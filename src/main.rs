@@ -106,8 +106,8 @@ fn buddha_box() {
     ));
 
     let quad3 = Box::new(Quad::new(
-        Point3::new(-1.0, 9.9, 1.0),
-        Vec3::new(-2.0, 0.0, 0.0),
+        Point3::new(-4.0, 9.99, 1.0),
+        Vec3::new(2.0, 0.0, 0.0),
         Vec3::new(0.0, 0.0, -2.0),
         light,
     ));
@@ -120,7 +120,7 @@ fn buddha_box() {
     ));
 
     let quad5 = Box::new(Quad::new(
-        Point3::new(-8.0, 0.0, 5.0),
+        Point3::new(-8.0, 10.0, -5.0),
         Vec3::new(10.0, 0.0, 0.0),
         Vec3::new(0.0, 0.0, 10.0),
         white2,
@@ -133,9 +133,18 @@ fn buddha_box() {
         white3,
     ));
 
+    let box1 = quad::make_box(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(3.0, 8.0, 3.0),
+        // || Box::new(Lambertian::from_color(Color::new(0.33, 0.33, 0.73))),
+        || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.02)),
+    );
+    let box1 = Box::new(Translate::new(box1, Vec3::new(-1.6, 0.0, 0.3)));
+    let box1 = Box::new(RotateY::new(box1, -49.0));
+
     let buddha_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
-    let buddha = Box::new(load_obj("buddha/buddha.obj", buddha_mat));
-    let buddha = Box::new(Translate::new(buddha, Vec3::new(-3.0, 1.0, 0.0)));
+    let buddha = Box::new(load_obj("buddha/buddha.obj", 8.0, buddha_mat));
+    let buddha = Box::new(Translate::new(buddha, Vec3::new(-5.0, 3.0, -1.0)));
     eprintln!("Buddha bbox: {:?}", buddha.bounding_box());
 
     world.add(quad1);
@@ -144,6 +153,7 @@ fn buddha_box() {
     world.add(quad4);
     world.add(quad5);
     world.add(quad6);
+    world.add(box1);
     world.add(buddha);
     eprintln!("Num objects: {}", world.objects.len());
     eprintln!("Building BVH...");
@@ -153,13 +163,13 @@ fn buddha_box() {
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
-    let samples_per_pixel = 100;
-    let max_depth = 40;
+    let samples_per_pixel = 2000;
+    let max_depth = 50;
     let background = Color::new(0.0, 0.0, 0.0);
 
-    let vfov = 40;
-    let lookfrom = Point3::new(-3.0, 5.5, -12.0);
-    let lookat = Point3::new(-3.0, 2.0, 0.0);
+    let vfov = 50;
+    let lookfrom = Point3::new(-3.0, 5.5, -15.0);
+    let lookat = Point3::new(-3.0, 5.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
 
     let defocus_angle = 0.0;
@@ -238,11 +248,11 @@ fn teapot_box() {
 
     let teapot_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
     // let teapot_mat = Arc::new(Dielectric::new(1.5));
-    let teapot = Box::new(load_obj("teapot.obj", teapot_mat));
+    let teapot = Box::new(load_obj("teapot.obj", 1.0, teapot_mat));
     let teapot = Box::new(Translate::new(teapot, Vec3::new(-3.0, 0.0, -2.5)));
 
     let teapot_mat2 = Arc::new(Dielectric::new(1.5));
-    let teapot2 = Box::new(load_obj("teapot.obj", teapot_mat2));
+    let teapot2 = Box::new(load_obj("teapot.obj", 1.0, teapot_mat2));
     let teapot2 = Box::new(Translate::new(teapot2, Vec3::new(-3.0, 0.0, -2.5)));
     world.add(Box::new(ConstantMedium::from_color(
         teapot2,
