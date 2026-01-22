@@ -36,7 +36,7 @@ mod triangle;
 mod vec3;
 
 fn main() {
-    match 11 {
+    match 9 {
         1 => {
             bouncing_spheres();
         }
@@ -383,6 +383,15 @@ fn cornell_smoke() {
         white3,
     ));
 
+    let glass_box1 = quad::make_box(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 330.0, 165.0),
+        || Box::new(Dielectric::new(1.5)),
+    );
+    let glass_box1 = Box::new(RotateY::new(glass_box1, 15.0));
+    let glass_box1 = Box::new(Translate::new(glass_box1, Vec3::new(265.0, 0.0, 295.0)));
+    world.add(glass_box1);
+
     let box1 = quad::make_box(
         Point3::new(0.0, 0.0, 0.0),
         Point3::new(165.0, 330.0, 165.0),
@@ -392,9 +401,18 @@ fn cornell_smoke() {
     let box1 = Box::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));
     let box1 = Box::new(ConstantMedium::from_color(
         box1,
-        0.01,
+        0.10,
         Color::new(0.0, 0.0, 0.0),
     ));
+
+    let glass_box2 = quad::make_box(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 165.0, 165.0),
+        || Box::new(Dielectric::new(1.5)),
+    );
+    let glass_box2 = Box::new(RotateY::new(glass_box2, -18.0));
+    let glass_box2 = Box::new(Translate::new(glass_box2, Vec3::new(130.0, 0.0, 65.0)));
+    world.add(glass_box2);
 
     let box2 = quad::make_box(
         Point3::new(0.0, 0.0, 0.0),
@@ -405,8 +423,8 @@ fn cornell_smoke() {
     let box2 = Box::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
     let box2 = Box::new(ConstantMedium::from_color(
         box2,
-        0.01,
-        Color::new(1.0, 1.0, 1.0),
+        0.10,
+        Color::new(0.2, 0.3, 0.8),
     ));
 
     world.add(quad1);
@@ -417,10 +435,11 @@ fn cornell_smoke() {
     world.add(quad6);
     world.add(box1);
     world.add(box2);
+    let bvh = BVHNode::from_list(world);
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
-    let samples_per_pixel = 800;
+    let samples_per_pixel = 1000;
     let max_depth = 500;
     let background = Color::new(0.0, 0.0, 0.0);
 
@@ -448,7 +467,7 @@ fn cornell_smoke() {
 
     // Render
 
-    cam.render(&world);
+    cam.render(&bvh);
 }
 
 fn cornell_box() {
@@ -506,8 +525,8 @@ fn cornell_box() {
     let box1 = quad::make_box(
         Point3::new(0.0, 0.0, 0.0),
         Point3::new(165.0, 330.0, 165.0),
-        || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
-        // || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
+        // || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
+        || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
     );
     let box1 = Box::new(RotateY::new(box1, 15.0));
     let box1 = Box::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));

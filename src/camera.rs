@@ -104,15 +104,17 @@ impl Camera {
         let pixels: Vec<Color> = (0..self.image_height)
             .into_par_iter()
             .flat_map_iter(|j| {
-                let row = (0..self.image_width as i32).map(move |i| {
-                    let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+                let row: Vec<Color> = (0..self.image_width as i32)
+                    .map(move |i| {
+                        let mut pixel_color = Color::new(0.0, 0.0, 0.0);
 
-                    for _ in 0..self.samples_per_pixel {
-                        let r = self.get_ray(i, j);
-                        pixel_color += ray_color(r, self.max_depth, world, self.background);
-                    }
-                    self.pixel_samples_scale * pixel_color
-                });
+                        for _ in 0..self.samples_per_pixel {
+                            let r = self.get_ray(i, j);
+                            pixel_color += ray_color(r, self.max_depth, world, self.background);
+                        }
+                        self.pixel_samples_scale * pixel_color
+                    })
+                    .collect();
 
                 let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
                 eprintln!("Progress: {:.1}%", 100.0 * done as f64 / total_lines as f64);
