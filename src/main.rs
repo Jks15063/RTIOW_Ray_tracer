@@ -11,7 +11,6 @@ use crate::quad::Quad;
 use crate::rtw_stb_image::ImageTexture;
 use crate::sphere::Sphere;
 use crate::texture::{CheckerTexture, PerlinNoise};
-use crate::triangle::Triangle;
 use crate::vec3::{Point3, Vec3};
 use core::f64;
 use rand::Rng;
@@ -66,7 +65,7 @@ fn main() {
             cornell_smoke();
         }
         10 => {
-            final_scene(800, 1000, 40);
+            final_scene(800, 10000, 50);
         }
         11 => {
             teapot_box();
@@ -129,9 +128,19 @@ fn teapot_box() {
         white3,
     ));
 
-    let teapot_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
+    // let teapot_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
+    let teapot_mat = Arc::new(Dielectric::new(1.5));
     let teapot = Box::new(load_obj("teapot.obj", teapot_mat));
-    let teapot = Box::new(Translate::new(teapot, Vec3::new(-2.5, 0.0, -2.5)));
+    let teapot = Box::new(Translate::new(teapot, Vec3::new(-3.0, 0.0, -2.5)));
+
+    let teapot_mat2 = Arc::new(Dielectric::new(1.5));
+    let teapot2 = Box::new(load_obj("teapot.obj", teapot_mat2));
+    let teapot2 = Box::new(Translate::new(teapot2, Vec3::new(-3.0, 0.0, -2.5)));
+    world.add(Box::new(ConstantMedium::from_color(
+        teapot2,
+        2.0,
+        Color::new(0.2, 0.4, 0.9),
+    )));
 
     world.add(quad1);
     world.add(quad2);
@@ -144,12 +153,12 @@ fn teapot_box() {
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
-    let samples_per_pixel = 200;
-    let max_depth = 50;
+    let samples_per_pixel = 1000;
+    let max_depth = 40;
     let background = Color::new(0.0, 0.0, 0.0);
 
     let vfov = 40;
-    let lookfrom = Point3::new(-3.0, 3.5, -12.0);
+    let lookfrom = Point3::new(-3.0, 5.5, -12.0);
     let lookat = Point3::new(-3.0, 2.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
 
@@ -522,7 +531,7 @@ fn cornell_box() {
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
-    let samples_per_pixel = 100;
+    let samples_per_pixel = 10000;
     let max_depth = 50;
     let background = Color::new(0.0, 0.0, 0.0);
 

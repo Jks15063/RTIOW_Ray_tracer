@@ -5,6 +5,11 @@ use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 use core::f64;
 
+pub trait Hittable: Send + Sync {
+    fn hit(&self, r: &Ray, ray_t: Interval) -> Option<HitRecord<'_>>;
+    fn bounding_box(&self) -> AABB;
+}
+
 pub struct HitRecord<'a> {
     pub p: Point3,
     pub normal: Vec3,
@@ -154,11 +159,6 @@ impl Hittable for RotateY {
     fn bounding_box(&self) -> AABB {
         self.bbox
     }
-}
-
-pub trait Hittable {
-    fn hit(&self, r: &Ray, ray_t: Interval) -> Option<HitRecord<'_>>;
-    fn bounding_box(&self) -> AABB;
 }
 
 fn degrees_to_radians(degrees: f64) -> f64 {

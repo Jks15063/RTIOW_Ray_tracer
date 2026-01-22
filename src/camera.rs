@@ -1,5 +1,7 @@
 use core::f64;
 use rand::Rng;
+use rayon::prelude::*;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 
 use crate::color::{self, Color};
@@ -93,25 +95,33 @@ impl Camera {
 
     pub fn render(&self, world: &dyn Hittable) {
         let start = Instant::now();
+        let completed = AtomicUsize::new(0);
+        let total_lines = self.image_height as usize;
         println!("P3");
         println!("{} {}", self.image_width, self.image_height);
         println!("255");
 
-        for j in 0..self.image_height {
-            eprintln!("Scanlines remaining: {}", (self.image_height - j));
-            for i in 0..self.image_width as i32 {
-                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+        let pixels: Vec<Color> = (0..self.image_height)
+            .into_par_iter()
+            .flat_map_iter(|j| {
+                let row = (0..self.image_width as i32).map(move |i| {
+                    let mut pixel_color = Color::new(0.0, 0.0, 0.0);
 
-                for _ in 0..self.samples_per_pixel {
-                    let r = self.get_ray(i, j);
-                    pixel_color += ray_color(r, self.max_depth, world, self.background);
-                }
+                    for _ in 0..self.samples_per_pixel {
+                        let r = self.get_ray(i, j);
+                        pixel_color += ray_color(r, self.max_depth, world, self.background);
+                    }
+                    self.pixel_samples_scale * pixel_color
+                });
 
-                println!(
-                    "{}",
-                    color::write_color(self.pixel_samples_scale * pixel_color)
-                );
-            }
+                let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
+                eprintln!("Progress: {:.1}%", 100.0 * done as f64 / total_lines as f64);
+                row
+            })
+            .collect();
+
+        for pixel in pixels {
+            println!("{}", color::write_color(pixel));
         }
 
         let duration = start.elapsed();
