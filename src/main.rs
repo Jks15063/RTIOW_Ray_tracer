@@ -29,6 +29,7 @@ mod interval;
 mod material;
 mod obj_loader;
 mod perlin;
+mod pi;
 mod quad;
 mod ray;
 mod rtw_stb_image;
@@ -38,7 +39,7 @@ mod triangle;
 mod vec3;
 
 fn main() {
-    match 12 {
+    match 8 {
         1 => {
             bouncing_spheres();
         }
@@ -74,6 +75,9 @@ fn main() {
         }
         12 => {
             buddha_box();
+        }
+        13 => {
+            pi::calc();
         }
         _ => {
             ();
@@ -142,6 +146,14 @@ fn buddha_box() {
     let box1 = Box::new(Translate::new(box1, Vec3::new(-1.6, 0.0, 0.3)));
     let box1 = Box::new(RotateY::new(box1, -49.0));
 
+    let sphere_mat = Box::new(Dielectric::new(1.5));
+    let sphere1 = Box::new(Sphere::new_static(
+        Point3::new(0.0, 0.0, 0.0),
+        2.5,
+        sphere_mat,
+    ));
+    let sphere1 = Box::new(Translate::new(sphere1, Vec3::new(-2.5, 2.5, -2.5)));
+
     let buddha_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
     let buddha = Box::new(load_obj("buddha/buddha.obj", 8.0, buddha_mat));
     let buddha = Box::new(Translate::new(buddha, Vec3::new(-5.0, 3.0, -1.0)));
@@ -154,6 +166,7 @@ fn buddha_box() {
     world.add(quad5);
     world.add(quad6);
     world.add(box1);
+    world.add(sphere1);
     world.add(buddha);
     eprintln!("Num objects: {}", world.objects.len());
     eprintln!("Building BVH...");
@@ -163,7 +176,7 @@ fn buddha_box() {
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
-    let samples_per_pixel = 2000;
+    let samples_per_pixel = 1000;
     let max_depth = 50;
     let background = Color::new(0.0, 0.0, 0.0);
 
@@ -643,8 +656,8 @@ fn cornell_box() {
     let box1 = quad::make_box(
         Point3::new(0.0, 0.0, 0.0),
         Point3::new(165.0, 330.0, 165.0),
-        // || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
-        || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
+        || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
+        // || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
     );
     let box1 = Box::new(RotateY::new(box1, 15.0));
     let box1 = Box::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));

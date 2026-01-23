@@ -19,6 +19,8 @@ pub struct Camera {
     pixel_delta_v: Vec3,
     samples_per_pixel: i32,
     pixel_samples_scale: f64,
+    sqrt_spp: i32,
+    recip_sqrt_spp: f64,
     max_depth: i32,
     background: Color,
     u: Vec3,
@@ -46,6 +48,10 @@ impl Camera {
         let image_height = (image_width / aspect_ratio) as i32;
         let image_height = if image_height < 1 { 1 } else { image_height };
 
+        let sqrt_spp = samples_per_pixel.isqrt();
+        let pixel_samples_scale = 1.0 / (sqrt_spp as f64 * sqrt_spp as f64);
+        let recip_sqrt_spp = 1.0 / sqrt_spp as f64;
+
         let center = lookfrom;
 
         // Determin viewport dimensions
@@ -67,7 +73,6 @@ impl Camera {
 
         let viewport_upper_left = center - (focus_dist * w) - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
-        let pixel_samples_scale = 1.0 / samples_per_pixel as f64;
 
         let defocus_radius = focus_dist * degrees_to_radians(defocus_angle / 2.0).tan();
         let defocus_disk_u = u * defocus_radius;
@@ -82,6 +87,8 @@ impl Camera {
             pixel_delta_v,
             samples_per_pixel,
             pixel_samples_scale,
+            sqrt_spp,
+            recip_sqrt_spp,
             max_depth,
             background,
             u,
@@ -108,10 +115,13 @@ impl Camera {
                     .map(move |i| {
                         let mut pixel_color = Color::new(0.0, 0.0, 0.0);
 
-                        for _ in 0..self.samples_per_pixel {
-                            let r = self.get_ray(i, j);
-                            pixel_color += ray_color(r, self.max_depth, world, self.background);
+                        for s_j in 0..self.sqrt_spp {
+                            for s_i in 0..self.sqrt_spp {
+                                let r = self.get_ray(i, j, s_i, s_j);
+                                pixel_color += ray_color(r, self.max_depth, world, self.background);
+                            }
                         }
+
                         self.pixel_samples_scale * pixel_color
                     })
                     .collect();
@@ -131,8 +141,8 @@ impl Camera {
         eprintln!("Render time: {:?}", duration);
     }
 
-    fn get_ray(&self, i: i32, j: i32) -> Ray {
-        let offset = sample_square();
+    fn get_ray(&self, i: i32, j: i32, s_i: i32, s_j: i32) -> Ray {
+        let offset = self.sample_square_stratified(s_i, s_j);
         let pixel_sample = self.pixel00_loc
             + ((i as f64 + offset.x()) * self.pixel_delta_u)
             + ((j as f64 + offset.y()) * self.pixel_delta_v);
@@ -153,6 +163,13 @@ impl Camera {
         let p = vec3::random_in_unit_disk();
 
         self.center + (p[0] * self.defocus_disk_u) + (p[1] * self.defocus_disk_v)
+    }
+
+    fn sample_square_stratified(&self, s_i: i32, s_j: i32) -> Vec3 {
+        let px: f64 = (s_i as f64 + rand::rng().random::<f64>()) * self.recip_sqrt_spp - 0.5;
+        let py: f64 = (s_j as f64 + rand::rng().random::<f64>()) * self.recip_sqrt_spp - 0.5;
+
+        Vec3::new(px, py, 0.0)
     }
 }
 
