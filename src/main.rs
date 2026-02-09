@@ -25,6 +25,7 @@ mod color;
 mod constant_medium;
 mod hittable;
 mod hittable_list;
+mod integrate_x_sq;
 mod interval;
 mod material;
 mod obj_loader;
@@ -34,6 +35,7 @@ mod quad;
 mod ray;
 mod rtw_stb_image;
 mod sphere;
+mod sphere_importance;
 mod texture;
 mod triangle;
 mod vec3;
@@ -78,6 +80,12 @@ fn main() {
         }
         13 => {
             pi::calc();
+        }
+        14 => {
+            integrate_x_sq::calc();
+        }
+        15 => {
+            sphere_importance::calc();
         }
         _ => {
             ();
