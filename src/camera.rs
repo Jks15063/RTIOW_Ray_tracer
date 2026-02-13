@@ -190,11 +190,32 @@ fn ray_color(r: Ray, depth: i32, world: &dyn Hittable, background: Color) -> Col
     }
 
     if let Some(rec) = world.hit(&r, Interval::new(0.001, f64::INFINITY)) {
-        let color_from_emission = rec.mat.emitted(rec.u, rec.v, rec.p);
+        let color_from_emission = rec.mat.emitted(r, &rec, rec.u, rec.v, rec.p);
 
         if let Some((attenuation, scattered, pdf_value)) = rec.mat.scatter(r, &rec) {
+            let on_light = Point3::new(
+                rand::rng().random_range(213.0..343.0),
+                554.0,
+                rand::rng().random_range(227.0..332.0),
+            );
+            let to_light = on_light - rec.p;
+            let distance_squared = to_light.length_squared();
+            let to_light = vec3::unit_vector(to_light);
+
+            if vec3::dot(to_light, rec.normal) < 0.0 {
+                return color_from_emission;
+            }
+
+            let light_area = (343.0 - 213.0) * (332.0 - 227.0);
+            let light_cosine = to_light.y().abs();
+
+            if light_cosine < 0.000001 {
+                return color_from_emission;
+            }
+
+            let pdf_value = distance_squared / (light_cosine * light_area);
+            let scattered = Ray::new(rec.p, to_light, r.time());
             let scattering_pdf = rec.mat.scattering_pdf(r, &rec, scattered);
-            let pdf_value = scattering_pdf;
 
             let color_from_scatter =
                 (attenuation * scattering_pdf * ray_color(scattered, depth - 1, world, background))
