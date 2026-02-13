@@ -4,17 +4,29 @@ use rand::Rng;
 
 use crate::color::Color;
 use crate::hittable::HitRecord;
-use crate::onb::Onb;
+use crate::pdf::Pdf;
+use crate::pdf::{CosinePdf, SpherePdf};
 use crate::ray::Ray;
 use crate::texture::{SolidColor, Texture};
 use crate::vec3::{self, Point3};
 
+pub enum ScatterRecord {
+    Pdf {
+        attenuation: Color,
+        pdf_ptr: Box<dyn Pdf>,
+    },
+    SkipPdf {
+        attenuation: Color,
+        ray: Ray,
+    },
+}
+
 pub trait Material: Send + Sync {
-    fn scatter(&self, _r_in: Ray, _rec: &HitRecord) -> Option<(Color, Ray, f64)> {
+    fn scatter(&self, _r_in: Ray, _rec: &HitRecord) -> Option<ScatterRecord> {
         None
     }
 
-    fn emitted(&self, r_in: Ray, rec: &HitRecord, _u: f64, _v: f64, _p: Point3) -> Color {
+    fn emitted(&self, _r_in: Ray, _rec: &HitRecord, _u: f64, _v: f64, _p: Point3) -> Color {
         Color::new(0.0, 0.0, 0.0)
     }
 
@@ -40,27 +52,22 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, r_in: Ray, rec: &HitRecord) -> Option<(Color, Ray, f64)> {
-        let uvw = Onb::new(rec.normal);
-        let mut scatter_direction = uvw.transform(vec3::random_cosine_direction());
-
-        if scatter_direction.near_zero() {
-            scatter_direction = rec.normal;
-        }
-
-        let scattered = Ray::new(rec.p, vec3::unit_vector(scatter_direction), r_in.time());
+    fn scatter(&self, _r_in: Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         let attenuation = self.tex.value(rec.u, rec.v, rec.p);
-        let pdf = vec3::dot(uvw.w(), scattered.direction()) / f64::consts::PI;
-        Some((attenuation, scattered, pdf))
+        let pdf_ptr = Box::new(CosinePdf::new(rec.normal));
+        Some(ScatterRecord::Pdf {
+            attenuation,
+            pdf_ptr,
+        })
     }
 
     fn scattering_pdf(&self, _r_in: Ray, rec: &HitRecord, scattered: Ray) -> f64 {
         let cos_theta = vec3::dot(rec.normal, vec3::unit_vector(scattered.direction()));
 
         if cos_theta < 0.0 {
-            return 0.0;
+            0.0
         } else {
-            return cos_theta / f64::consts::PI;
+            cos_theta / f64::consts::PI
         }
     }
 }
@@ -77,17 +84,13 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, r_in: Ray, rec: &HitRecord) -> Option<(Color, Ray, f64)> {
+    fn scatter(&self, r_in: Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         let reflected = vec3::reflect(r_in.direction(), rec.normal);
         let reflected = vec3::unit_vector(reflected) + (self.fuzz * vec3::random_unit_vector());
-        let scattered = Ray::new(rec.p, reflected, r_in.time());
-        let pdf = 1.0;
+        let attenuation = self.albedo;
+        let ray = Ray::new(rec.p, reflected, r_in.time());
 
-        if vec3::dot(scattered.direction(), rec.normal) > 0.0 {
-            Some((self.albedo, scattered, pdf))
-        } else {
-            None
-        }
+        Some(ScatterRecord::SkipPdf { attenuation, ray })
     }
 }
 
@@ -102,7 +105,7 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn scatter(&self, r_in: Ray, rec: &HitRecord) -> Option<(Color, Ray, f64)> {
+    fn scatter(&self, r_in: Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         let attenuation = Color::new(1.0, 1.0, 1.0);
         let ri = if rec.front_face {
             1.0 / self.refraction_index
@@ -121,10 +124,9 @@ impl Material for Dielectric {
             vec3::refract(unit_direction, rec.normal, ri)
         };
 
-        let scattered = Ray::new(rec.p, direction, r_in.time());
-        let pdf = 1.0;
+        let ray = Ray::new(rec.p, direction, r_in.time());
 
-        Some((attenuation, scattered, pdf))
+        Some(ScatterRecord::SkipPdf { attenuation, ray })
     }
 }
 
@@ -177,12 +179,14 @@ impl Isotropic {
 }
 
 impl Material for Isotropic {
-    fn scatter(&self, r_in: Ray, rec: &HitRecord) -> Option<(Color, Ray, f64)> {
-        let scattered = Ray::new(rec.p, vec3::random_unit_vector(), r_in.time());
+    fn scatter(&self, _r_in: Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         let attenuation = self.tex.value(rec.u, rec.v, rec.p);
-        let pdf = 1.0 / (4.0 * f64::consts::PI);
+        let pdf_ptr = Box::new(SpherePdf {});
 
-        Some((attenuation, scattered, pdf))
+        Some(ScatterRecord::Pdf {
+            attenuation,
+            pdf_ptr,
+        })
     }
 
     fn scattering_pdf(&self, _r_in: Ray, _rec: &HitRecord, _scattered: Ray) -> f64 {

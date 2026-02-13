@@ -7,6 +7,8 @@ use std::time::Instant;
 use crate::color::{self, Color};
 use crate::hittable::Hittable;
 use crate::interval::Interval;
+use crate::material::ScatterRecord;
+use crate::pdf::{CosinePdf, HittablePdf, MixturePdf, Pdf};
 use crate::ray::Ray;
 use crate::vec3::{self, Point3, Vec3};
 
@@ -100,7 +102,7 @@ impl Camera {
         }
     }
 
-    pub fn render(&self, world: &dyn Hittable) {
+    pub fn render(&self, world: &dyn Hittable, lights: &dyn Hittable) {
         let start = Instant::now();
         let completed = AtomicUsize::new(0);
         let total_lines = self.image_height as usize;
@@ -118,7 +120,7 @@ impl Camera {
                         for s_j in 0..self.sqrt_spp {
                             for s_i in 0..self.sqrt_spp {
                                 let r = self.get_ray(i, j, s_i, s_j);
-                                pixel_color += ray_color(r, self.max_depth, world, self.background);
+                                pixel_color += ray_color(r, self.max_depth, world, lights);
                             }
                         }
 
@@ -184,7 +186,7 @@ fn sample_square() -> Vec3 {
     Vec3::new(x - 0.5, y - 0.5, 0.0)
 }
 
-fn ray_color(r: Ray, depth: i32, world: &dyn Hittable, background: Color) -> Color {
+fn ray_color(r: Ray, depth: i32, world: &dyn Hittable, lights: &dyn Hittable) -> Color {
     if depth <= 0 {
         return Color::new(0.0, 0.0, 0.0);
     }
@@ -192,39 +194,33 @@ fn ray_color(r: Ray, depth: i32, world: &dyn Hittable, background: Color) -> Col
     if let Some(rec) = world.hit(&r, Interval::new(0.001, f64::INFINITY)) {
         let color_from_emission = rec.mat.emitted(r, &rec, rec.u, rec.v, rec.p);
 
-        if let Some((attenuation, scattered, pdf_value)) = rec.mat.scatter(r, &rec) {
-            let on_light = Point3::new(
-                rand::rng().random_range(213.0..343.0),
-                554.0,
-                rand::rng().random_range(227.0..332.0),
-            );
-            let to_light = on_light - rec.p;
-            let distance_squared = to_light.length_squared();
-            let to_light = vec3::unit_vector(to_light);
+        if let Some(srec) = rec.mat.scatter(r, &rec) {
+            match srec {
+                ScatterRecord::SkipPdf { attenuation, ray } => {
+                    attenuation * ray_color(ray, depth - 1, world, lights)
+                }
+                ScatterRecord::Pdf {
+                    attenuation,
+                    pdf_ptr,
+                } => {
+                    let light_pdf = HittablePdf::new(lights, rec.p);
+                    let p = MixturePdf::new(&light_pdf, pdf_ptr);
+                    let scattered = Ray::new(rec.p, p.generate(), r.time());
+                    let pdf_value = p.value(scattered.direction());
 
-            if vec3::dot(to_light, rec.normal) < 0.0 {
-                return color_from_emission;
+                    let scattering_pdf = rec.mat.scattering_pdf(r, &rec, scattered);
+
+                    let sample_color = ray_color(scattered, depth - 1, world, lights);
+                    let color_from_scatter =
+                        (attenuation * scattering_pdf * sample_color) / pdf_value;
+
+                    color_from_emission + color_from_scatter
+                }
             }
-
-            let light_area = (343.0 - 213.0) * (332.0 - 227.0);
-            let light_cosine = to_light.y().abs();
-
-            if light_cosine < 0.000001 {
-                return color_from_emission;
-            }
-
-            let pdf_value = distance_squared / (light_cosine * light_area);
-            let scattered = Ray::new(rec.p, to_light, r.time());
-            let scattering_pdf = rec.mat.scattering_pdf(r, &rec, scattered);
-
-            let color_from_scatter =
-                (attenuation * scattering_pdf * ray_color(scattered, depth - 1, world, background))
-                    / pdf_value;
-
-            return color_from_emission + color_from_scatter;
+        } else {
+            color_from_emission
         }
-        return color_from_emission;
+    } else {
+        Color::new(0.0, 0.0, 0.0)
     }
-
-    background
 }

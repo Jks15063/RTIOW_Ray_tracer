@@ -1,3 +1,7 @@
+use core::f64;
+
+use rand::Rng;
+
 use crate::aabb::AABB;
 use crate::hittable::{HitRecord, Hittable};
 use crate::hittable_list::HittableList;
@@ -7,14 +11,15 @@ use crate::ray::Ray;
 use crate::vec3::{self, Point3, Vec3};
 
 pub struct Quad {
-    Q: Point3,
-    u: Vec3,
-    v: Vec3,
-    w: Vec3,
+    Q: Point3, //corner point of quad
+    u: Vec3,   // edge vector
+    v: Vec3,   // edge vector
+    w: Vec3,   // used for hit test
     mat: Box<dyn Material>,
     bbox: AABB,
     normal: Vec3,
-    D: f64,
+    D: f64, // plane equation constant
+    area: f64,
 }
 
 impl Quad {
@@ -24,6 +29,7 @@ impl Quad {
         let normal = vec3::unit_vector(n);
         let D = vec3::dot(normal, Q);
         let w = n / vec3::dot(n, n);
+        let area = n.length();
 
         Self {
             Q,
@@ -34,6 +40,7 @@ impl Quad {
             bbox,
             normal,
             D,
+            area,
         }
     }
 }
@@ -80,6 +87,28 @@ impl Hittable for Quad {
 
     fn bounding_box(&self) -> AABB {
         self.bbox
+    }
+
+    fn pdf_value(&self, origin: Point3, direction: Vec3) -> f64 {
+        if let Some(rec) = self.hit(
+            &Ray::new(origin, direction, 0.0),
+            Interval::new(0.001, f64::INFINITY),
+        ) {
+            let distance_squared = rec.t * rec.t * direction.length_squared();
+            let cosine = (vec3::dot(direction, rec.normal) / direction.length()).abs();
+
+            distance_squared / (cosine * self.area)
+        } else {
+            0.0
+        }
+    }
+
+    fn random(&self, origin: Point3) -> Vec3 {
+        let p = self.Q
+            + (rand::rng().random::<f64>() * self.u)
+            + (rand::rng().random::<f64>() * self.v);
+
+        p - origin
     }
 }
 
