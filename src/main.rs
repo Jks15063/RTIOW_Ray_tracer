@@ -43,7 +43,6 @@ mod triangle;
 mod vec3;
 
 fn main() {
-    // cornell_box();
     match 8 {
         // 1 => {
         //     bouncing_spheres();
@@ -72,9 +71,9 @@ fn main() {
         9 => {
             cornell_smoke();
         }
-        // 10 => {
-        //     final_scene(800, 10000, 50);
-        // }
+        10 => {
+            final_scene(800, 10000, 50);
+        }
         // 11 => {
         //     teapot_box();
         // }
@@ -326,152 +325,163 @@ fn main() {
 //     cam.render(&bvh);
 // }
 
-// fn final_scene(image_width: i32, samples_per_pixel: i32, max_depth: i32) {
-//     let mut boxes1 = HittableList::new();
+fn final_scene(image_width: i32, samples_per_pixel: i32, max_depth: i32) {
+    let mut boxes1 = HittableList::new();
 
-//     let boxes_per_side = 20;
+    let boxes_per_side = 20;
 
-//     for i in 0..boxes_per_side {
-//         for j in 0..boxes_per_side {
-//             let w = 100.0;
-//             let x0 = -1000.0 + i as f64 * w;
-//             let z0 = -1000.0 + j as f64 * w;
-//             let y0 = 0.0;
-//             let x1 = x0 + w;
-//             let y1: f64 = rand::rng().random_range(1.0..101.0);
-//             let z1 = z0 + w;
+    for i in 0..boxes_per_side {
+        for j in 0..boxes_per_side {
+            let w = 100.0;
+            let x0 = -1000.0 + i as f64 * w;
+            let z0 = -1000.0 + j as f64 * w;
+            let y0 = 0.0;
+            let x1 = x0 + w;
+            let y1: f64 = rand::rng().random_range(1.0..101.0);
+            let z1 = z0 + w;
 
-//             boxes1.add(quad::make_box(
-//                 Point3::new(x0, y0, z0),
-//                 Point3::new(x1, y1, z1),
-//                 || Box::new(Lambertian::from_color(Color::new(0.48, 0.83, 0.53))),
-//             ));
-//         }
-//     }
+            boxes1.add(quad::make_box(
+                Point3::new(x0, y0, z0),
+                Point3::new(x1, y1, z1),
+                || Box::new(Lambertian::from_color(Color::new(0.48, 0.83, 0.53))),
+            ));
+        }
+    }
 
-//     let bvh = BVHNode::from_list(boxes1);
-//     let mut world = HittableList::new();
-//     world.add(Box::new(bvh));
+    let bvh = BVHNode::from_list(boxes1);
+    let mut world = HittableList::new();
+    world.add(Box::new(bvh));
 
-//     let light = Box::new(DiffuseLight::from_color(Color::new(7.0, 7.0, 7.0)));
-//     let light_quad = Box::new(Quad::new(
-//         Point3::new(123.0, 554.0, 147.0),
-//         Vec3::new(300.0, 0.0, 0.0),
-//         Vec3::new(0.0, 0.0, 265.0),
-//         light,
-//     ));
-//     world.add(light_quad);
+    let light = Box::new(DiffuseLight::from_color(Color::new(7.0, 7.0, 7.0)));
+    let light_quad = Box::new(Quad::new(
+        Point3::new(123.0, 554.0, 147.0),
+        Vec3::new(300.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 265.0),
+        light,
+    ));
+    world.add(light_quad);
 
-//     let center1 = Point3::new(400.0, 400.0, 200.0);
-//     let center2 = center1 + Point3::new(30.0, 0.0, 0.0);
-//     let sphere_material = Box::new(Lambertian::from_color(Color::new(0.7, 0.3, 0.1)));
-//     let sphere = Box::new(Sphere::new_moving(center1, center2, 50.0, sphere_material));
-//     world.add(sphere);
+    let center1 = Point3::new(400.0, 400.0, 200.0);
+    let center2 = center1 + Point3::new(30.0, 0.0, 0.0);
+    let sphere_material = Box::new(Lambertian::from_color(Color::new(0.7, 0.3, 0.1)));
+    let sphere = Box::new(Sphere::new_moving(center1, center2, 50.0, sphere_material));
+    world.add(sphere);
 
-//     world.add(Box::new(Sphere::new_static(
-//         Point3::new(260.0, 150.0, 45.0),
-//         50.0,
-//         Box::new(Dielectric::new(1.5)),
-//     )));
+    world.add(Box::new(Sphere::new_static(
+        Point3::new(260.0, 150.0, 45.0),
+        50.0,
+        Box::new(Dielectric::new(1.5)),
+    )));
 
-//     world.add(Box::new(Sphere::new_static(
-//         Point3::new(0.0, 150.0, 145.0),
-//         50.0,
-//         Box::new(Metal::new(Color::new(0.8, 0.8, 0.9), 1.0)),
-//     )));
+    world.add(Box::new(Sphere::new_static(
+        Point3::new(0.0, 150.0, 145.0),
+        50.0,
+        Box::new(Metal::new(Color::new(0.8, 0.8, 0.9), 1.0)),
+    )));
 
-//     let boundary1 = Box::new(Sphere::new_static(
-//         Point3::new(360.0, 150.0, 145.0),
-//         70.0,
-//         Box::new(Dielectric::new(1.5)),
-//     ));
+    let boundary1 = Box::new(Sphere::new_static(
+        Point3::new(360.0, 150.0, 145.0),
+        70.0,
+        Box::new(Dielectric::new(1.5)),
+    ));
 
-//     let boundary2 = Box::new(Sphere::new_static(
-//         Point3::new(360.0, 150.0, 145.0),
-//         70.0,
-//         Box::new(Dielectric::new(1.5)),
-//     ));
-//     world.add(boundary1);
+    let boundary2 = Box::new(Sphere::new_static(
+        Point3::new(360.0, 150.0, 145.0),
+        70.0,
+        Box::new(Dielectric::new(1.5)),
+    ));
+    world.add(boundary1);
 
-//     world.add(Box::new(ConstantMedium::from_color(
-//         boundary2,
-//         0.2,
-//         Color::new(0.2, 0.4, 0.9),
-//     )));
+    world.add(Box::new(ConstantMedium::from_color(
+        boundary2,
+        0.2,
+        Color::new(0.2, 0.4, 0.9),
+    )));
 
-//     let boundary = Box::new(Sphere::new_static(
-//         Point3::new(0.0, 0.0, 0.0),
-//         5000.0,
-//         Box::new(Dielectric::new(1.5)),
-//     ));
-//     world.add(Box::new(ConstantMedium::from_color(
-//         boundary,
-//         0.0001,
-//         Color::new(1.0, 1.0, 1.0),
-//     )));
+    let boundary = Box::new(Sphere::new_static(
+        Point3::new(0.0, 0.0, 0.0),
+        5000.0,
+        Box::new(Dielectric::new(1.5)),
+    ));
+    world.add(Box::new(ConstantMedium::from_color(
+        boundary,
+        0.0001,
+        Color::new(1.0, 1.0, 1.0),
+    )));
 
-//     let emat = Box::new(Lambertian::new(Box::new(ImageTexture::new("earthmap.jpg"))));
-//     world.add(Box::new(Sphere::new_static(
-//         Point3::new(400.0, 200.0, 400.0),
-//         100.0,
-//         emat,
-//     )));
+    let emat = Box::new(Lambertian::new(Box::new(ImageTexture::new("earthmap.jpg"))));
+    world.add(Box::new(Sphere::new_static(
+        Point3::new(400.0, 200.0, 400.0),
+        100.0,
+        emat,
+    )));
 
-//     let pertex = Box::new(PerlinNoise::new(0.2));
-//     world.add(Box::new(Sphere::new_static(
-//         Point3::new(220.0, 280.0, 300.0),
-//         80.0,
-//         Box::new(Lambertian::new(pertex)),
-//     )));
+    let pertex = Box::new(PerlinNoise::new(0.2));
+    world.add(Box::new(Sphere::new_static(
+        Point3::new(220.0, 280.0, 300.0),
+        80.0,
+        Box::new(Lambertian::new(pertex)),
+    )));
 
-//     let mut boxes2 = HittableList::new();
+    let mut boxes2 = HittableList::new();
 
-//     for _i in 0..1000 {
-//         let white = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
-//         boxes2.add(Box::new(Sphere::new_static(
-//             vec3::random_range(0.0, 165.0),
-//             10.0,
-//             white,
-//         )));
-//     }
+    for _i in 0..1000 {
+        let white = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+        boxes2.add(Box::new(Sphere::new_static(
+            vec3::random_range(0.0, 165.0),
+            10.0,
+            white,
+        )));
+    }
 
-//     world.add(Box::new(Translate::new(
-//         Box::new(RotateY::new(Box::new(BVHNode::from_list(boxes2)), 15.0)),
-//         Vec3::new(-100.0, 270.0, 395.0),
-//     )));
+    world.add(Box::new(Translate::new(
+        Box::new(RotateY::new(Box::new(BVHNode::from_list(boxes2)), 15.0)),
+        Vec3::new(-100.0, 270.0, 395.0),
+    )));
 
-//     let aspect_ratio: f64 = 1.0;
-//     let image_width = image_width;
-//     let samples_per_pixel = samples_per_pixel;
-//     let max_depth = max_depth;
-//     let background = Color::new(0.0, 0.0, 0.0);
+    let mut lights = HittableList::new();
+    let light2 = Box::new(DiffuseLight::from_color(Color::new(7.0, 7.0, 7.0)));
+    let light_quad2 = Box::new(Quad::new(
+        Point3::new(123.0, 554.0, 147.0),
+        Vec3::new(300.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 265.0),
+        light2,
+    ));
 
-//     let vfov = 40;
-//     let lookfrom = Point3::new(478.0, 278.0, -600.0);
-//     let lookat = Point3::new(278.0, 278.0, 0.0);
-//     let vup = Vec3::new(0.0, 1.0, 0.0);
+    lights.add(light_quad2);
 
-//     let defocus_angle = 0.0;
-//     let focus_dist = 10.0;
+    let aspect_ratio: f64 = 1.0;
+    let image_width = image_width;
+    let samples_per_pixel = samples_per_pixel;
+    let max_depth = max_depth;
+    let background = Color::new(0.0, 0.0, 0.0);
 
-//     let cam = Camera::new(
-//         aspect_ratio,
-//         image_width as f64,
-//         samples_per_pixel,
-//         max_depth,
-//         background,
-//         vfov,
-//         lookfrom,
-//         lookat,
-//         vup,
-//         defocus_angle,
-//         focus_dist,
-//     );
+    let vfov = 40;
+    let lookfrom = Point3::new(478.0, 278.0, -600.0);
+    let lookat = Point3::new(278.0, 278.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
 
-//     // Render
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
 
-//     cam.render(&world);
-// }
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width as f64,
+        samples_per_pixel,
+        max_depth,
+        background,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
+
+    // Render
+
+    cam.render(&world, &lights);
+}
 
 fn cornell_smoke() {
     let mut world = HittableList::new();
@@ -674,27 +684,45 @@ fn cornell_box() {
     let box1 = quad::make_box(
         Point3::new(0.0, 0.0, 0.0),
         Point3::new(165.0, 330.0, 165.0),
-        // || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
-        || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
+        || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
+        // || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
     );
     let box1 = Box::new(RotateY::new(box1, 15.0));
     let box1 = Box::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));
 
-    let box2 = quad::make_box(
-        Point3::new(0.0, 0.0, 0.0),
-        Point3::new(165.0, 165.0, 165.0),
-        || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
-        // || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
-    );
-    let box2 = Box::new(RotateY::new(box2, -18.0));
-    let box2 = Box::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
+    // let box2 = quad::make_box(
+    //     Point3::new(0.0, 0.0, 0.0),
+    //     Point3::new(165.0, 165.0, 165.0),
+    //     || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
+    //     // || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
+    // );
+    // let box2 = Box::new(RotateY::new(box2, -18.0));
+    // let box2 = Box::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
 
-    let lights = Quad::new(
+    let glass = Box::new(Dielectric::new(1.5));
+    let sphere = Box::new(Sphere::new_static(
+        Point3::new(190.0, 90.0, 190.0),
+        90.0,
+        glass,
+    ));
+
+    let mut lights = HittableList::new();
+    let hittable_light = Box::new(Quad::new(
         Point3::new(343.0, 554.0, 332.0),
         Vec3::new(-130.0, 0.0, 0.0),
         Vec3::new(0.0, 0.0, -105.0),
         Box::new(DiffuseLight::from_color(Color::new(15.0, 15.0, 15.0))),
-    );
+    ));
+
+    let glass2 = Box::new(Dielectric::new(1.5));
+    let sphere2 = Box::new(Sphere::new_static(
+        Point3::new(190.0, 90.0, 190.0),
+        90.0,
+        glass2,
+    ));
+
+    lights.add(hittable_light);
+    lights.add(sphere2);
 
     world.add(quad1);
     world.add(quad2);
@@ -703,7 +731,8 @@ fn cornell_box() {
     world.add(quad5);
     world.add(quad6);
     world.add(box1);
-    world.add(box2);
+    // world.add(box2);
+    world.add(sphere);
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;

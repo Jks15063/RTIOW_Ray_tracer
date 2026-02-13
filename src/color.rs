@@ -1,4 +1,3 @@
-pub use crate::vec3::{random, random_range};
 use crate::{interval::Interval, vec3::Vec3};
 
 pub type Color = Vec3;
@@ -7,6 +6,10 @@ pub fn write_color(pixel_color: Color) -> String {
     let r = pixel_color.x();
     let g = pixel_color.y();
     let b = pixel_color.z();
+
+    let r = if r.is_nan() { 0.0 } else { r };
+    let g = if g.is_nan() { 0.0 } else { g };
+    let b = if b.is_nan() { 0.0 } else { b };
 
     let r = linear_to_gamma(r);
     let g = linear_to_gamma(g);
