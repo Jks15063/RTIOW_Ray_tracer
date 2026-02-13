@@ -192,9 +192,13 @@ fn ray_color(r: Ray, depth: i32, world: &dyn Hittable, background: Color) -> Col
     if let Some(rec) = world.hit(&r, Interval::new(0.001, f64::INFINITY)) {
         let color_from_emission = rec.mat.emitted(rec.u, rec.v, rec.p);
 
-        if let Some((attenuation, scattered)) = rec.mat.scatter(r, rec) {
+        if let Some((attenuation, scattered, pdf_value)) = rec.mat.scatter(r, &rec) {
+            let scattering_pdf = rec.mat.scattering_pdf(r, &rec, scattered);
+            let pdf_value = scattering_pdf;
+
             let color_from_scatter =
-                attenuation * ray_color(scattered, depth - 1, world, background);
+                (attenuation * scattering_pdf * ray_color(scattered, depth - 1, world, background))
+                    / pdf_value;
 
             return color_from_emission + color_from_scatter;
         }

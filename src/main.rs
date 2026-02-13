@@ -29,6 +29,7 @@ mod integrate_x_sq;
 mod interval;
 mod material;
 mod obj_loader;
+mod onb;
 mod perlin;
 mod pi;
 mod quad;
@@ -689,7 +690,7 @@ fn cornell_box() {
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
-    let samples_per_pixel = 10000;
+    let samples_per_pixel = 1_000;
     let max_depth = 50;
     let background = Color::new(0.0, 0.0, 0.0);
 

@@ -1,3 +1,4 @@
+use core::f64;
 use rand::Rng;
 use std::fmt;
 use std::ops::Add;
@@ -91,6 +92,18 @@ pub fn random_range(min: f64, max: f64) -> Vec3 {
         rand::rng().random_range(min..max),
         rand::rng().random_range(min..max),
     )
+}
+
+pub fn random_cosine_direction() -> Vec3 {
+    let r1: f64 = rand::rng().random();
+    let r2: f64 = rand::rng().random();
+
+    let phi = 2.0 * f64::consts::PI * r1;
+    let x = phi.cos() * r2.sqrt();
+    let y = phi.sin() * r2.sqrt();
+    let z = (1.0 - r2).sqrt();
+
+    Vec3::new(x, y, z)
 }
 
 impl Vec3 {
