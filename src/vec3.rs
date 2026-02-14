@@ -136,6 +136,14 @@ impl Vec3 {
         let s = 1e-8;
         self.e[0].abs() < s && self.e[1].abs() < s && self.e[2].abs() < s
     }
+
+    pub fn clamp(&self, min: f64, max: f64) -> Vec3 {
+        Vec3::new(
+            self.x().clamp(min, max),
+            self.y().clamp(min, max),
+            self.z().clamp(min, max),
+        )
+    }
 }
 
 impl fmt::Display for Vec3 {
