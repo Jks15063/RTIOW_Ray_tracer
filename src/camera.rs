@@ -213,7 +213,7 @@ fn ray_color(r: Ray, depth: i32, world: &dyn Hittable, lights: &dyn Hittable) ->
                     let sample_color = ray_color(scattered, depth - 1, world, lights);
                     let color_from_scatter =
                         (attenuation * scattering_pdf * sample_color) / pdf_value;
-                    let color_from_scatter = color_from_scatter.clamp(0.0, 10.0);
+                    let color_from_scatter = color_from_scatter.clamp(0.0, 30.0);
 
                     color_from_emission + color_from_scatter
                 }
