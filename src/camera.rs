@@ -50,6 +50,8 @@ impl Camera {
         let image_height = (image_width / aspect_ratio) as i32;
         let image_height = if image_height < 1 { 1 } else { image_height };
 
+        // Stratified sampling: divide each pixel into a sqrt_spp x sqrt_spp grid
+        // and take one sample per sub-pixel cell
         let sqrt_spp = samples_per_pixel.isqrt();
         let pixel_samples_scale = 1.0 / (sqrt_spp as f64 * sqrt_spp as f64);
         let recip_sqrt_spp = 1.0 / sqrt_spp as f64;
@@ -57,25 +59,42 @@ impl Camera {
         let center = lookfrom;
 
         // Determin viewport dimensions
-
+        // Convert vertical field of view to viewport dimensions.
+        // h is the half-height of the viewport at unit distance,
+        // then scaled by focus_dist to get the actual viewport size
+        // at the focal plane.
         let theta = degrees_to_radians(vfov as f64);
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h * focus_dist;
         let viewport_width = viewport_height * (image_width / image_height as f64);
 
+        // Camera basis vectors:
+        // w points backward (from lookat toward camera)
+        // u points right
+        // v points up
         let w = vec3::unit_vector(lookfrom - lookat);
         let u = vec3::unit_vector(vec3::cross(vup, w));
         let v = vec3::cross(w, u);
 
+        // Viewport edge vectors in world space.
+        // viewport_v is negated because pixel rows go top-to-bottom
+        // but v points upward.
         let viewport_u = viewport_width * u;
         let viewport_v = viewport_height * -v;
 
+        // Distance between pixel centers in world space
         let pixel_delta_u = viewport_u / image_width;
         let pixel_delta_v = viewport_v / image_height as f64;
 
+        // Locate the upper-left pixel center.
+        // Start at camera, move forward to focal plane, then offset
+        // to the top-left corner, then inset by half a pixel.
         let viewport_upper_left = center - (focus_dist * w) - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
+        // Defocus disk (depth of field).
+        // Rays originate from random points on this disk instead of
+        // a single point. Larger disk = more blur for out-of-focus objects.
         let defocus_radius = focus_dist * degrees_to_radians(defocus_angle / 2.0).tan();
         let defocus_disk_u = u * defocus_radius;
         let defocus_disk_v = v * defocus_radius;
