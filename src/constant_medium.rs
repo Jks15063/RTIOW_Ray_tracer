@@ -35,6 +35,16 @@ impl ConstantMedium {
             phase_function: Box::new(Isotropic::from_color(albedo)),
         }
     }
+
+    pub fn from_color_emit(boundary: Box<dyn Hittable>, density: f64, albedo: Color) -> Self {
+        let neg_inv_density = -1.0 / density;
+
+        Self {
+            boundary,
+            neg_inv_density,
+            phase_function: Box::new(Isotropic::from_color_emit(albedo)),
+        }
+    }
 }
 
 impl Hittable for ConstantMedium {

@@ -43,7 +43,7 @@ mod triangle;
 mod vec3;
 
 fn main() {
-    match 8 {
+    match 12 {
         // 1 => {
         //     bouncing_spheres();
         // }
@@ -72,14 +72,14 @@ fn main() {
             cornell_smoke();
         }
         10 => {
-            final_scene(800, 10000, 50);
+            final_scene(800, 20_000, 50);
         }
-        // 11 => {
-        //     teapot_box();
-        // }
-        // 12 => {
-        //     buddha_box();
-        // }
+        11 => {
+            teapot_box();
+        }
+        12 => {
+            buddha_box();
+        }
         // 13 => {
         //     pi::calc();
         // }
@@ -95,235 +95,296 @@ fn main() {
     }
 }
 
-// fn buddha_box() {
-//     let mut world = HittableList::new();
+fn buddha_box() {
+    let mut world = HittableList::new();
 
-//     let red = Box::new(Lambertian::from_color(Color::new(0.65, 0.05, 0.05)));
-//     let white1 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
-//     let white2 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
-//     let white3 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
-//     let green = Box::new(Lambertian::from_color(Color::new(0.12, 0.45, 0.15)));
-//     let light = Box::new(DiffuseLight::from_color(Color::new(15.0, 15.0, 15.0)));
+    let red = Box::new(Lambertian::from_color(Color::new(0.65, 0.05, 0.05)));
+    let white1 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let white2 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let white3 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let green = Box::new(Lambertian::from_color(Color::new(0.12, 0.45, 0.15)));
 
-//     let quad1 = Box::new(Quad::new(
-//         Point3::new(2.0, 0.0, -5.0),
-//         Vec3::new(0.0, 10.0, 0.0),
-//         Vec3::new(0.0, 0.0, 10.0),
-//         green,
-//     ));
+    // green
+    // let light = Box::new(DiffuseLight::from_color(Color::new(4.0, 12.0, 12.0)));
 
-//     let quad2 = Box::new(Quad::new(
-//         Point3::new(-8.0, 0.0, -5.0),
-//         Vec3::new(0.0, 10.0, 0.0),
-//         Vec3::new(0.0, 0.0, 10.0),
-//         red,
-//     ));
+    // candlelight
+    // let light = Box::new(DiffuseLight::from_color(Color::new(15.0, 10.0, 5.0)));
 
-//     let quad3 = Box::new(Quad::new(
-//         Point3::new(-4.0, 9.99, 1.0),
-//         Vec3::new(2.0, 0.0, 0.0),
-//         Vec3::new(0.0, 0.0, -2.0),
-//         light,
-//     ));
+    let light = Box::new(DiffuseLight::from_color(Color::new(2.0, 2.0, 2.0)));
 
-//     let quad4 = Box::new(Quad::new(
-//         Point3::new(-8.0, 0.0, -5.0),
-//         Vec3::new(10.0, 0.0, 0.0),
-//         Vec3::new(0.0, 0.0, 10.0),
-//         white1,
-//     ));
+    let quad1 = Box::new(Quad::new(
+        Point3::new(2.0, 0.0, -5.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        green,
+    ));
 
-//     let quad5 = Box::new(Quad::new(
-//         Point3::new(-8.0, 10.0, -5.0),
-//         Vec3::new(10.0, 0.0, 0.0),
-//         Vec3::new(0.0, 0.0, 10.0),
-//         white2,
-//     ));
+    let quad2 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, -5.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        red,
+    ));
 
-//     let quad6 = Box::new(Quad::new(
-//         Point3::new(-8.0, 0.0, 5.0),
-//         Vec3::new(10.0, 0.0, 0.0),
-//         Vec3::new(0.0, 10.0, 0.0),
-//         white3,
-//     ));
+    let light_quad = Box::new(Quad::new(
+        Point3::new(-4.0, 9.99, 1.0),
+        Vec3::new(0.0, 0.0, -2.0),
+        Vec3::new(2.0, 0.0, 0.0),
+        light,
+    ));
 
-//     let box1 = quad::make_box(
-//         Point3::new(0.0, 0.0, 0.0),
-//         Point3::new(3.0, 8.0, 3.0),
-//         // || Box::new(Lambertian::from_color(Color::new(0.33, 0.33, 0.73))),
-//         || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.02)),
-//     );
-//     let box1 = Box::new(Translate::new(box1, Vec3::new(-1.6, 0.0, 0.3)));
-//     let box1 = Box::new(RotateY::new(box1, -49.0));
+    let quad4 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, -5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        white1,
+    ));
 
-//     let sphere_mat = Box::new(Dielectric::new(1.5));
-//     let sphere1 = Box::new(Sphere::new_static(
-//         Point3::new(0.0, 0.0, 0.0),
-//         2.5,
-//         sphere_mat,
-//     ));
-//     let sphere1 = Box::new(Translate::new(sphere1, Vec3::new(-2.5, 2.5, -2.5)));
+    let quad5 = Box::new(Quad::new(
+        Point3::new(-8.0, 10.0, -5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        white2,
+    ));
 
-//     let buddha_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
-//     let buddha = Box::new(load_obj("buddha/buddha.obj", 8.0, buddha_mat));
-//     let buddha = Box::new(Translate::new(buddha, Vec3::new(-5.0, 3.0, -1.0)));
-//     eprintln!("Buddha bbox: {:?}", buddha.bounding_box());
+    let quad6 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, 5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        white3,
+    ));
 
-//     world.add(quad1);
-//     world.add(quad2);
-//     world.add(quad3);
-//     world.add(quad4);
-//     world.add(quad5);
-//     world.add(quad6);
-//     world.add(box1);
-//     world.add(sphere1);
-//     world.add(buddha);
-//     eprintln!("Num objects: {}", world.objects.len());
-//     eprintln!("Building BVH...");
-//     let start = Instant::now();
-//     let bvh = BVHNode::from_list(world);
-//     eprintln!("BVH built in {:?}", start.elapsed());
+    let box1 = quad::make_box(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(3.0, 8.0, 3.0),
+        // || Box::new(Lambertian::from_color(Color::new(0.33, 0.33, 0.73))),
+        || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.02)),
+    );
+    let box1 = Box::new(Translate::new(box1, Vec3::new(-1.6, 0.0, 0.3)));
+    let box1 = Box::new(RotateY::new(box1, -49.0));
 
-//     let aspect_ratio: f64 = 1.0;
-//     let image_width: f64 = 600.0;
-//     let samples_per_pixel = 1000;
-//     let max_depth = 50;
-//     let background = Color::new(0.0, 0.0, 0.0);
+    let fog_sphere = Box::new(Sphere::new_static(
+        Point3::new(0.0, 0.0, 0.0),
+        50.0,
+        Box::new(Dielectric::new(1.5)),
+    ));
+    let fog = Box::new(ConstantMedium::from_color(
+        fog_sphere,
+        0.02,
+        Color::new(1.0, 1.0, 1.0),
+    ));
+    // let sphere_mat = Box::new(Dielectric::new(1.5));
+    // let sphere1 = Box::new(Sphere::new_static(
+    //     Point3::new(0.0, 0.0, 0.0),
+    //     2.5,
+    //     sphere_mat,
+    // ));
+    // let sphere1 = Box::new(Translate::new(sphere1, Vec3::new(-2.5, 2.5, -2.5)));
 
-//     let vfov = 50;
-//     let lookfrom = Point3::new(-3.0, 5.5, -15.0);
-//     let lookat = Point3::new(-3.0, 5.0, 0.0);
-//     let vup = Vec3::new(0.0, 1.0, 0.0);
+    // let light_mat_2 = Box::new(DiffuseLight::from_color(Color::new(5.0, 3.0, 2.0)));
+    // let light_sphere = Box::new(Sphere::new_static(
+    //     Point3::new(0.0, 0.0, 0.0),
+    //     1.0,
+    //     light_mat_2,
+    // ));
+    // let light_sphere = Box::new(Translate::new(light_sphere, Vec3::new(-1.0, 1.5, -3.0)));
 
-//     let defocus_angle = 0.0;
-//     let focus_dist = 10.0;
+    // let buddha_mat = Arc::new(Metal::new(Color::new(0.75, 0.6, 0.35), 0.5));
+    let buddha_mat = Arc::new(Dielectric::new(1.5));
+    let buddha = Box::new(load_obj("buddha/buddha.obj", 8.0, buddha_mat));
+    let buddha = Box::new(Translate::new(buddha, Vec3::new(-5.0, 3.0, -1.0)));
 
-//     let cam = Camera::new(
-//         aspect_ratio,
-//         image_width,
-//         samples_per_pixel,
-//         max_depth,
-//         background,
-//         vfov,
-//         lookfrom,
-//         lookat,
-//         vup,
-//         defocus_angle,
-//         focus_dist,
-//     );
+    let fog_buddha_mat = Arc::new(Lambertian::from_color(Color::new(1.0, 1.0, 1.0)));
+    let fog_buddha = Box::new(load_obj("buddha/buddha.obj", 8.0, fog_buddha_mat));
+    let fog_buddha = Box::new(Translate::new(fog_buddha, Vec3::new(-5.0, 3.0, -1.0)));
+    let fog_buddha = Box::new(ConstantMedium::from_color_emit(
+        fog_buddha,
+        0.1,
+        Color::new(0.0, 0.0, 2.0),
+    ));
 
-//     // Render
+    world.add(quad1);
+    world.add(quad2);
+    world.add(light_quad);
+    world.add(quad4);
+    world.add(quad5);
+    world.add(quad6);
+    world.add(box1);
+    // world.add(sphere1);
+    // world.add(light_sphere);
+    world.add(buddha);
+    world.add(fog_buddha);
+    world.add(fog);
+    let bvh = BVHNode::from_list(world);
 
-//     cam.render(&bvh);
-// }
+    let mut lights = HittableList::new();
+    let light = Box::new(DiffuseLight::from_color(Color::new(15.0, 15.0, 15.0)));
+    let hittable_light = Box::new(Quad::new(
+        Point3::new(-4.0, 9.99, 1.0),
+        Vec3::new(2.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -2.0),
+        light,
+    ));
 
-// fn teapot_box() {
-//     let mut world = HittableList::new();
+    // let hittable_light_mat = Box::new(DiffuseLight::from_color(Color::new(15.0, 15.0, 15.0)));
+    // let hittable_light_sphere = Box::new(Sphere::new_static(
+    //     Point3::new(-1.0, 1.5, -3.0),
+    //     1.0,
+    //     hittable_light_mat,
+    // ));
+    lights.add(hittable_light);
+    // lights.add(hittable_light_sphere);
 
-//     let red = Box::new(Lambertian::from_color(Color::new(0.65, 0.05, 0.05)));
-//     let white1 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
-//     let white2 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
-//     let white3 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
-//     let green = Box::new(Lambertian::from_color(Color::new(0.12, 0.45, 0.15)));
-//     let light = Box::new(DiffuseLight::from_color(Color::new(15.0, 15.0, 15.0)));
+    let aspect_ratio: f64 = 1.0;
+    let image_width: f64 = 600.0;
+    let samples_per_pixel = 1_000;
+    let max_depth = 50;
+    let background = Color::new(0.0, 0.0, 0.0);
 
-//     let quad1 = Box::new(Quad::new(
-//         Point3::new(2.0, 0.0, -5.0),
-//         Vec3::new(0.0, 10.0, 0.0),
-//         Vec3::new(0.0, 0.0, 10.0),
-//         green,
-//     ));
+    let vfov = 50;
+    let lookfrom = Point3::new(-3.0, 5.5, -15.0);
+    let lookat = Point3::new(-3.0, 5.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
 
-//     let quad2 = Box::new(Quad::new(
-//         Point3::new(-8.0, 0.0, -5.0),
-//         Vec3::new(0.0, 10.0, 0.0),
-//         Vec3::new(0.0, 0.0, 10.0),
-//         red,
-//     ));
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
 
-//     let quad3 = Box::new(Quad::new(
-//         Point3::new(-1.0, 9.9, 1.0),
-//         Vec3::new(-2.0, 0.0, 0.0),
-//         Vec3::new(0.0, 0.0, -2.0),
-//         light,
-//     ));
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        background,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
 
-//     let quad4 = Box::new(Quad::new(
-//         Point3::new(-8.0, 0.0, -5.0),
-//         Vec3::new(10.0, 0.0, 0.0),
-//         Vec3::new(0.0, 0.0, 10.0),
-//         white1,
-//     ));
+    // Render
 
-//     let quad5 = Box::new(Quad::new(
-//         Point3::new(-8.0, 0.0, 5.0),
-//         Vec3::new(10.0, 0.0, 0.0),
-//         Vec3::new(0.0, 0.0, 10.0),
-//         white2,
-//     ));
+    cam.render(&bvh, &lights);
+}
 
-//     let quad6 = Box::new(Quad::new(
-//         Point3::new(-8.0, 0.0, 5.0),
-//         Vec3::new(10.0, 0.0, 0.0),
-//         Vec3::new(0.0, 10.0, 0.0),
-//         white3,
-//     ));
+fn teapot_box() {
+    let mut world = HittableList::new();
 
-//     let teapot_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
-//     // let teapot_mat = Arc::new(Dielectric::new(1.5));
-//     let teapot = Box::new(load_obj("teapot.obj", 1.0, teapot_mat));
-//     let teapot = Box::new(Translate::new(teapot, Vec3::new(-3.0, 0.0, -2.5)));
+    let red = Box::new(Lambertian::from_color(Color::new(0.65, 0.05, 0.05)));
+    let white1 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let white2 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let white3 = Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73)));
+    let green = Box::new(Lambertian::from_color(Color::new(0.12, 0.45, 0.15)));
+    let light = Box::new(DiffuseLight::from_color(Color::new(15.0, 15.0, 15.0)));
 
-//     let teapot_mat2 = Arc::new(Dielectric::new(1.5));
-//     let teapot2 = Box::new(load_obj("teapot.obj", 1.0, teapot_mat2));
-//     let teapot2 = Box::new(Translate::new(teapot2, Vec3::new(-3.0, 0.0, -2.5)));
-//     world.add(Box::new(ConstantMedium::from_color(
-//         teapot2,
-//         2.0,
-//         Color::new(0.2, 0.4, 0.9),
-//     )));
+    let quad1 = Box::new(Quad::new(
+        Point3::new(2.0, 0.0, -5.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        green,
+    ));
 
-//     world.add(quad1);
-//     world.add(quad2);
-//     world.add(quad3);
-//     world.add(quad4);
-//     world.add(quad5);
-//     world.add(quad6);
-//     world.add(teapot);
-//     let bvh = BVHNode::from_list(world);
+    let quad2 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, -5.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        red,
+    ));
 
-//     let aspect_ratio: f64 = 1.0;
-//     let image_width: f64 = 600.0;
-//     let samples_per_pixel = 1000;
-//     let max_depth = 40;
-//     let background = Color::new(0.0, 0.0, 0.0);
+    let quad3 = Box::new(Quad::new(
+        Point3::new(-1.0, 9.9, 1.0),
+        Vec3::new(-2.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -2.0),
+        light,
+    ));
 
-//     let vfov = 40;
-//     let lookfrom = Point3::new(-3.0, 5.5, -12.0);
-//     let lookat = Point3::new(-3.0, 2.0, 0.0);
-//     let vup = Vec3::new(0.0, 1.0, 0.0);
+    let quad4 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, -5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        white1,
+    ));
 
-//     let defocus_angle = 0.0;
-//     let focus_dist = 10.0;
+    let quad5 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, 5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 10.0),
+        white2,
+    ));
 
-//     let cam = Camera::new(
-//         aspect_ratio,
-//         image_width,
-//         samples_per_pixel,
-//         max_depth,
-//         background,
-//         vfov,
-//         lookfrom,
-//         lookat,
-//         vup,
-//         defocus_angle,
-//         focus_dist,
-//     );
+    let quad6 = Box::new(Quad::new(
+        Point3::new(-8.0, 0.0, 5.0),
+        Vec3::new(10.0, 0.0, 0.0),
+        Vec3::new(0.0, 10.0, 0.0),
+        white3,
+    ));
 
-//     // Render
+    // let teapot_mat = Arc::new(Lambertian::from_color(Color::new(0.8, 0.5, 0.2)));
+    let teapot_mat = Arc::new(Dielectric::new(1.5));
+    let teapot = Box::new(load_obj("teapot.obj", 1.0, teapot_mat));
+    let teapot = Box::new(Translate::new(teapot, Vec3::new(-3.0, 0.0, -2.5)));
 
-//     cam.render(&bvh);
-// }
+    let teapot_mat2 = Arc::new(Dielectric::new(1.5));
+    let teapot2 = Box::new(load_obj("teapot.obj", 1.0, teapot_mat2));
+    let teapot2 = Box::new(Translate::new(teapot2, Vec3::new(-3.0, 0.0, -2.5)));
+    world.add(Box::new(ConstantMedium::from_color(
+        teapot2,
+        2.0,
+        Color::new(0.2, 0.4, 0.9),
+    )));
+
+    world.add(quad1);
+    world.add(quad2);
+    world.add(quad3);
+    world.add(quad4);
+    world.add(quad5);
+    world.add(quad6);
+    world.add(teapot);
+    let bvh = BVHNode::from_list(world);
+
+    let mut lights = HittableList::new();
+    let light = Box::new(DiffuseLight::from_color(Color::new(15.0, 15.0, 15.0)));
+    let hittable_light = Box::new(Quad::new(
+        Point3::new(-1.0, 9.9, 1.0),
+        Vec3::new(-2.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -2.0),
+        light,
+    ));
+    lights.add(hittable_light);
+
+    let aspect_ratio: f64 = 1.0;
+    let image_width: f64 = 600.0;
+    let samples_per_pixel = 1_000;
+    let max_depth = 40;
+    let background = Color::new(0.0, 0.0, 0.0);
+
+    let vfov = 40;
+    let lookfrom = Point3::new(-3.0, 5.5, -12.0);
+    let lookat = Point3::new(-3.0, 2.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples_per_pixel,
+        max_depth,
+        background,
+        vfov,
+        lookfrom,
+        lookat,
+        vup,
+        defocus_angle,
+        focus_dist,
+    );
+
+    // Render
+
+    cam.render(&bvh, &lights);
+}
 
 fn final_scene(image_width: i32, samples_per_pixel: i32, max_depth: i32) {
     let mut boxes1 = HittableList::new();
@@ -394,7 +455,7 @@ fn final_scene(image_width: i32, samples_per_pixel: i32, max_depth: i32) {
 
     world.add(Box::new(ConstantMedium::from_color(
         boundary2,
-        0.2,
+        0.1,
         Color::new(0.2, 0.4, 0.9),
     )));
 
@@ -440,15 +501,13 @@ fn final_scene(image_width: i32, samples_per_pixel: i32, max_depth: i32) {
     )));
 
     let mut lights = HittableList::new();
-    let light2 = Box::new(DiffuseLight::from_color(Color::new(7.0, 7.0, 7.0)));
-    let light_quad2 = Box::new(Quad::new(
+    let hittable_light = Box::new(Quad::new(
         Point3::new(123.0, 554.0, 147.0),
         Vec3::new(300.0, 0.0, 0.0),
         Vec3::new(0.0, 0.0, 265.0),
-        light2,
+        Box::new(DiffuseLight::from_color(Color::new(7.0, 7.0, 7.0))),
     ));
-
-    lights.add(light_quad2);
+    lights.add(hittable_light);
 
     let aspect_ratio: f64 = 1.0;
     let image_width = image_width;
@@ -684,8 +743,8 @@ fn cornell_box() {
     let box1 = quad::make_box(
         Point3::new(0.0, 0.0, 0.0),
         Point3::new(165.0, 330.0, 165.0),
-        || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
-        // || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
+        // || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
+        || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
     );
     let box1 = Box::new(RotateY::new(box1, 15.0));
     let box1 = Box::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));
@@ -736,17 +795,17 @@ fn cornell_box() {
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
-    let samples_per_pixel = 10_000;
+    let samples_per_pixel = 20_000;
     let max_depth = 50;
     let background = Color::new(0.0, 0.0, 0.0);
 
-    let vfov = 40;
+    let vfov = 38;
     let lookfrom = Point3::new(278.0, 278.0, -800.0);
     let lookat = Point3::new(278.0, 278.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
 
     let defocus_angle = 0.0;
-    let focus_dist = 10.0;
+    let focus_dist = 800.0;
 
     let cam = Camera::new(
         aspect_ratio,

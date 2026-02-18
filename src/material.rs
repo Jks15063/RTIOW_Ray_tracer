@@ -164,17 +164,26 @@ impl Material for DiffuseLight {
 
 pub struct Isotropic {
     tex: Box<dyn Texture>,
+    emit: bool,
 }
 
 impl Isotropic {
     pub fn from_color(albedo: Color) -> Self {
         Self {
             tex: Box::new(SolidColor::new(albedo)),
+            emit: false,
         }
     }
 
     pub fn from_texture(tex: Box<dyn Texture>) -> Self {
-        Self { tex }
+        Self { tex, emit: false }
+    }
+
+    pub fn from_color_emit(albedo: Color) -> Self {
+        Self {
+            tex: Box::new(SolidColor::new(albedo)),
+            emit: true,
+        }
     }
 }
 
@@ -191,5 +200,13 @@ impl Material for Isotropic {
 
     fn scattering_pdf(&self, _r_in: Ray, _rec: &HitRecord, _scattered: Ray) -> f64 {
         1.0 / (4.0 * f64::consts::PI)
+    }
+
+    fn emitted(&self, _r_in: Ray, _rec: &HitRecord, u: f64, v: f64, p: Point3) -> Color {
+        if self.emit {
+            self.tex.value(u, v, p)
+        } else {
+            Color::new(0.0, 0.0, 0.0)
+        }
     }
 }
