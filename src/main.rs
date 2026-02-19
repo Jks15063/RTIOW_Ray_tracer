@@ -43,7 +43,7 @@ mod triangle;
 mod vec3;
 
 fn main() {
-    match 12 {
+    match 8 {
         // 1 => {
         //     bouncing_spheres();
         // }
@@ -743,27 +743,27 @@ fn cornell_box() {
     let box1 = quad::make_box(
         Point3::new(0.0, 0.0, 0.0),
         Point3::new(165.0, 330.0, 165.0),
-        // || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
-        || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
+        || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
+        // || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
     );
     let box1 = Box::new(RotateY::new(box1, 15.0));
     let box1 = Box::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));
 
-    // let box2 = quad::make_box(
-    //     Point3::new(0.0, 0.0, 0.0),
-    //     Point3::new(165.0, 165.0, 165.0),
-    //     || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
-    //     // || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
-    // );
-    // let box2 = Box::new(RotateY::new(box2, -18.0));
-    // let box2 = Box::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
+    let box2 = quad::make_box(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 165.0, 165.0),
+        || Box::new(Lambertian::from_color(Color::new(0.73, 0.73, 0.73))),
+        // || Box::new(Metal::new(Color::new(0.73, 0.73, 0.73), 0.0)),
+    );
+    let box2 = Box::new(RotateY::new(box2, -18.0));
+    let box2 = Box::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
 
-    let glass = Box::new(Dielectric::new(1.5));
-    let sphere = Box::new(Sphere::new_static(
-        Point3::new(190.0, 90.0, 190.0),
-        90.0,
-        glass,
-    ));
+    // let glass = Box::new(Dielectric::new(1.5));
+    // let sphere = Box::new(Sphere::new_static(
+    //     Point3::new(190.0, 90.0, 190.0),
+    //     90.0,
+    //     glass,
+    // ));
 
     let mut lights = HittableList::new();
     let hittable_light = Box::new(Quad::new(
@@ -773,15 +773,15 @@ fn cornell_box() {
         Box::new(DiffuseLight::from_color(Color::new(15.0, 15.0, 15.0))),
     ));
 
-    let glass2 = Box::new(Dielectric::new(1.5));
-    let sphere2 = Box::new(Sphere::new_static(
-        Point3::new(190.0, 90.0, 190.0),
-        90.0,
-        glass2,
-    ));
+    // let glass2 = Box::new(Dielectric::new(1.5));
+    // let sphere2 = Box::new(Sphere::new_static(
+    //     Point3::new(190.0, 90.0, 190.0),
+    //     90.0,
+    //     glass2,
+    // ));
 
     lights.add(hittable_light);
-    lights.add(sphere2);
+    // lights.add(sphere2);
 
     world.add(quad1);
     world.add(quad2);
@@ -790,12 +790,12 @@ fn cornell_box() {
     world.add(quad5);
     world.add(quad6);
     world.add(box1);
-    // world.add(box2);
-    world.add(sphere);
+    world.add(box2);
+    // world.add(sphere);
 
     let aspect_ratio: f64 = 1.0;
     let image_width: f64 = 600.0;
-    let samples_per_pixel = 20_000;
+    let samples_per_pixel = 1_000;
     let max_depth = 50;
     let background = Color::new(0.0, 0.0, 0.0);
 
