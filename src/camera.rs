@@ -122,6 +122,7 @@ impl Camera {
     }
 
     pub fn render(&self, world: &dyn Hittable, lights: &dyn Hittable) {
+        eprintln!("Threads: {}", rayon::current_num_threads());
         let start = Instant::now();
         let completed = AtomicUsize::new(0);
         let total_lines = self.image_height as usize;
